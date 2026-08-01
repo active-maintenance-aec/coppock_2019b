@@ -21,6 +21,8 @@
 - [Maintained rewrite verification](#maintained-rewrite-verification)
 - [R environment](#r-environment)
 
+*Drafted by Claude Opus 5 under the supervision of Alex Coppock.*
+
 This repository holds the actively maintained replication code for
 Coppock (2019), together with the reproducibility report that documents
 what the original archive did and did not do. It is part of a program
@@ -81,9 +83,8 @@ installation, and it stops twice, at two independent points, neither of
 which produces a helpful error message.
 
 The first failure is the bootstrap. `broom::bootstrap()` still exists,
-contrary to what the March 2026 pass on this paper recorded, but it
-builds a grouped data frame in the format dplyr used before version
-0.8.0, and the `dplyr::do()` on the next line rejects it with
+but it builds a grouped data frame in the format dplyr used before
+version 0.8.0, and the `dplyr::do()` on the next line rejects it with
 `Corrupt grouped_df using old (< 0.8.0) format`. The second failure is
 downstream of that and would be reached by anyone who fixed the first:
 the script reads `fit_1$coefficients`, `fit_1$ci_lower` and
@@ -95,11 +96,11 @@ script on its first line for anyone not working on macOS or Windows: the
 `load()` call asks for `voterIDexp_data_sept2014.Rdata` and the
 deposited file is `voterIDexp_data_sept2014.RData`.
 
-Both are mechanical, so the archive is Category 2: resolvable without
-the author. Ten lines in four places make it run to completion, and 18
-of the 22 published values it can be checked against come back. The 4
-that do not are described below, and none of the four is the archive’s
-fault: two belong to R and two to the article’s own prose.
+Both are mechanical and resolvable without the author. Ten lines in four
+places make it run to completion, and 18 of the 22 published values it
+can be checked against come back. The 4 that do not are described below,
+and none of the four is the archive’s fault: two belong to R and two to
+the article’s own prose.
 
 ## Does the maintained rewrite reproduce the paper?
 
@@ -117,10 +118,8 @@ bounds. R 3.6.0 changed how `sample()` converts uniform draws into
 integers, so the archive’s `set.seed(343)` selects different resamples
 than it did in 2018. Restoring the old sampler with
 `RNGkind(sample.kind = "Rounding")` returns the published interval
-exactly. The March 2026 pass attributed this drift to a difference
-between `broom::bootstrap()` and `rsample::bootstraps()`; that
-explanation is wrong, and the two functions are shown below to draw
-identically.
+exactly. The drift is the sampler, not the bootstrap package: the two
+are shown below to draw identically.
 
 The third is an inconsistency inside the article. Table 2 reports the
 Always-Responder estimate as $-0.056$ and the text on the same page
@@ -284,12 +283,10 @@ interval.
 
 Two things follow. The first is that `rsample::bootstraps()` and the
 archive’s own `sample(n, replace = TRUE)` scheme give the identical
-interval at the identical seed, to the last digit. The March 2026 pass
-on this paper recorded the divergence as “expected due to RNG difference
-between `broom::bootstrap()` and `rsample`” and wrote that explanation
-into both the notes and the report; the two rows above that agree
-exactly are the same 1,000 resamples reached by two routes, and the
-explanation was false.
+interval at the identical seed, to the last digit. The two rows above
+that agree exactly are the same 1,000 resamples reached by two routes,
+so no difference between the bootstrap implementations can explain the
+drift.
 
 The second is that restoring the old sampler restores the published
 interval to the digit the article prints, $[-0.73, 0.726]$. The deposit

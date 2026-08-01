@@ -45,6 +45,8 @@ response_rates <- read_csv(here::here("maintained", "output", "text_response_rat
                            show_col_types = FALSE)
 ```
 
+*Drafted by Claude Opus 5 under the supervision of Alex Coppock.*
+
 This repository holds the actively maintained replication code for Coppock (2019), together with the reproducibility report that documents what the original archive did and did not do. It is part of a program applying the maintenance proposal in Peer, Orr and Coppock (2021, *PS: Political Science & Politics*, doi [10.1017/S1049096521000366](https://doi.org/10.1017/S1049096521000366)) to a set of published archives.
 
 | | |
@@ -86,9 +88,9 @@ Two questions, answered before the detail.
 
 No. The archive's single script stops partway through on a current R installation, and it stops twice, at two independent points, neither of which produces a helpful error message.
 
-The first failure is the bootstrap. `broom::bootstrap()` still exists, contrary to what the March 2026 pass on this paper recorded, but it builds a grouped data frame in the format dplyr used before version 0.8.0, and the `dplyr::do()` on the next line rejects it with `Corrupt grouped_df using old (< 0.8.0) format`. The second failure is downstream of that and would be reached by anyone who fixed the first: the script reads `fit_1$coefficients`, `fit_1$ci_lower` and `fit_1$ci_upper` out of a tidied `lm_robust` object, and current `estimatr` names those columns `estimate`, `conf.low` and `conf.high`. That one fails with `non-numeric argument to mathematical function`, which says nothing about the renamed column. A third defect stops the script on its first line for anyone not working on macOS or Windows: the `load()` call asks for `voterIDexp_data_sept2014.Rdata` and the deposited file is `voterIDexp_data_sept2014.RData`.
+The first failure is the bootstrap. `broom::bootstrap()` still exists, but it builds a grouped data frame in the format dplyr used before version 0.8.0, and the `dplyr::do()` on the next line rejects it with `Corrupt grouped_df using old (< 0.8.0) format`. The second failure is downstream of that and would be reached by anyone who fixed the first: the script reads `fit_1$coefficients`, `fit_1$ci_lower` and `fit_1$ci_upper` out of a tidied `lm_robust` object, and current `estimatr` names those columns `estimate`, `conf.low` and `conf.high`. That one fails with `non-numeric argument to mathematical function`, which says nothing about the renamed column. A third defect stops the script on its first line for anyone not working on macOS or Windows: the `load()` call asks for `voterIDexp_data_sept2014.Rdata` and the deposited file is `voterIDexp_data_sept2014.RData`.
 
-Both are mechanical, so the archive is Category 2: resolvable without the author. Ten lines in four places make it run to completion, and `r n_archive_match` of the `r n_archive_verifiable` published values it can be checked against come back. The `r n_archive_fail` that do not are described below, and none of the four is the archive's fault: two belong to R and two to the article's own prose.
+Both are mechanical and resolvable without the author. Ten lines in four places make it run to completion, and `r n_archive_match` of the `r n_archive_verifiable` published values it can be checked against come back. The `r n_archive_fail` that do not are described below, and none of the four is the archive's fault: two belong to R and two to the article's own prose.
 
 ## Does the maintained rewrite reproduce the paper?
 
@@ -96,7 +98,7 @@ Yes, on every quantity the paper's own analysis produces. Every estimate, confid
 
 Three of the `r n_rewrite_verifiable` checkable rows carry `match_rewrite = 0`, and none of the three is a reproduction failure.
 
-Two are the endpoints of the bootstrap confidence interval on the bounds. R 3.6.0 changed how `sample()` converts uniform draws into integers, so the archive's `set.seed(343)` selects different resamples than it did in 2018. Restoring the old sampler with `RNGkind(sample.kind = "Rounding")` returns the published interval exactly. The March 2026 pass attributed this drift to a difference between `broom::bootstrap()` and `rsample::bootstraps()`; that explanation is wrong, and the two functions are shown below to draw identically.
+Two are the endpoints of the bootstrap confidence interval on the bounds. R 3.6.0 changed how `sample()` converts uniform draws into integers, so the archive's `set.seed(343)` selects different resamples than it did in 2018. Restoring the old sampler with `RNGkind(sample.kind = "Rounding")` returns the published interval exactly. The drift is the sampler, not the bootstrap package: the two are shown below to draw identically.
 
 The third is an inconsistency inside the article. Table 2 reports the Always-Responder estimate as $-0.056$ and the text on the same page reports it as $-5.5$ points. The estimate is $-5.563$ points, so the table rounds and the text truncates. The same truncation appears one sentence later, where the standard error on the redefined outcome is stated as 1.7 points against an actual 1.756.
 
@@ -212,7 +214,7 @@ sampler |>
     column_spec(1, width = "8cm"))
 ```
 
-Two things follow. The first is that `rsample::bootstraps()` and the archive's own `sample(n, replace = TRUE)` scheme give the identical interval at the identical seed, to the last digit. The March 2026 pass on this paper recorded the divergence as "expected due to RNG difference between `broom::bootstrap()` and `rsample`" and wrote that explanation into both the notes and the report; the two rows above that agree exactly are the same 1,000 resamples reached by two routes, and the explanation was false.
+Two things follow. The first is that `rsample::bootstraps()` and the archive's own `sample(n, replace = TRUE)` scheme give the identical interval at the identical seed, to the last digit. The two rows above that agree exactly are the same 1,000 resamples reached by two routes, so no difference between the bootstrap implementations can explain the drift.
 
 The second is that restoring the old sampler restores the published interval to the digit the article prints, $[-0.73, 0.726]$. The deposit is internally reproducible. What changed was R.
 
