@@ -1,0 +1,5 @@
+file,dataverse_file_id,file_persistent_id,bytes,md5_served,md5_published,unf,served_as
+README.txt,3109131,doi:10.7910/DVN/6NVI9C/IDAKNG,1412,7cd67821b74179e9136ffa15f691cad1,7cd67821b74179e9136ffa15f691cad1,,README.txt
+aec_replication_JEPS.R,3109129,doi:10.7910/DVN/6NVI9C/E1P4FN,5545,30413cdf0b04f4b46ffb88412463ecbd,30413cdf0b04f4b46ffb88412463ecbd,,aec_replication_JEPS.R
+aec_replication_JEPS.html,3109132,doi:10.7910/DVN/6NVI9C/XWJF1H,743854,3b32d554b077fa777416d16c617688d5,3b32d554b077fa777416d16c617688d5,,aec_replication_JEPS.html
+voterIDexp_data_sept2014.RData,3109130,doi:10.7910/DVN/6NVI9C/SLVKMW,541907,fead100f6f21d00381dd4f08f16ec2c8,fead100f6f21d00381dd4f08f16ec2c8,,voterIDexp_data_sept2014.RData

@@ -1,0 +1,4 @@
+method,conf_low,conf_high
+"Maintained rewrite: rsample::bootstraps(), R 3.6+ sampler",-0.7386384996582365,0.7253517471602583
+"Archive resampling scheme, R 3.6+ sampler",-0.7386384996582365,0.7253517471602583
+"Archive resampling scheme, pre-3.6 sampler",-0.7295795542345639,0.725813260303815
