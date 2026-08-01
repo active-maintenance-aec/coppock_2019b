@@ -1,26 +1,26 @@
-paper_id,table_figure,claim,value_script,value_paper,match,notes,value_rewrite,match_rewrite
-coppock_2019b,table_2,naive_estimate,-0.035,-0.035,1,,-0.035,1
-coppock_2019b,table_2,naive_ci_lower,-0.075,-0.075,1,,-0.075,1
-coppock_2019b,table_2,naive_ci_upper,0.005,0.005,1,,0.005,1
-coppock_2019b,table_2,redefined_estimate,-0.061,-0.061,1,,-0.061,1
-coppock_2019b,table_2,redefined_ci_lower,-0.095,-0.095,1,,-0.095,1
-coppock_2019b,table_2,redefined_ci_upper,-0.027,-0.027,1,,-0.027,1
-coppock_2019b,table_2,ar_estimate,-0.056,-0.056,1,,-0.056,1
-coppock_2019b,table_2,ar_ci_lower,-0.104,-0.104,1,,-0.104,1
-coppock_2019b,table_2,ar_ci_upper,-0.007,-0.007,1,,-0.007,1
-coppock_2019b,table_2,bounds_low,-0.658,-0.658,1,,-0.658,1
-coppock_2019b,table_2,bounds_high,0.645,0.645,1,,0.645,1
-coppock_2019b,table_2,bounds_ci_lower,-0.739,-0.73,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives -0.730, which is the published value",-0.739,0
-coppock_2019b,table_2,bounds_ci_upper,0.725,0.726,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives 0.726, which is the published value",0.725,0
-coppock_2019b,text_p1,response_rate_non_latino,,70.5,NA,"Attributed to White et al. (2015); the deposited script never computes it. The maintained rewrite recovers it from the deposited data on the paper's own analysis frame",70.5,1
-coppock_2019b,text_p1,response_rate_latino,,64.8,NA,"Attributed to White et al. (2015); the deposited script never computes it",64.8,1
-coppock_2019b,text_p1,response_rate_difference,,-5.7,NA,"Attributed to White et al. (2015); the deposited script never computes it",-5.7,1
-coppock_2019b,text_p3,bounds_low_points,-66,-66,1,"Text states -66 points; -65.78 at full precision",-66,1
-coppock_2019b,text_p3,bounds_high_points,65,65,1,"Text states 65 points; 64.54 at full precision",65,1
-coppock_2019b,text_p3,n_ar_pairs,719,719,1,"Not printed by the deposited script; 719 distinct pair_id values in the wnf_always_responders object it builds",719,1
-coppock_2019b,text_p3,ar_estimate_points,-5.6,-5.5,0,"Text states -5.5 points, Table 2 states -0.056; the estimate is -5.563 points, so the text truncates where the table rounds. Internal inconsistency in the article, not a reproduction failure",-5.6,0
-coppock_2019b,text_p3,ar_se_points,2.5,2.5,1,"2.482 at full precision",2.5,1
-coppock_2019b,text_p3,redefined_estimate_points,-6.1,-6,1,"Text states a 6 point decrease; -6.100 at full precision",-6.1,1
-coppock_2019b,text_p3,redefined_se_points,1.8,1.7,0,"Text states SE = 1.7 points; the standard error is 1.756 points, which rounds to 1.8. The text truncates rather than rounds",1.8,0
-coppock_2019b,text_p3,naive_estimate_points,-3.5,-3.5,1,"-3.542 at full precision",-3.5,1
-coppock_2019b,text_p3,naive_se_points,2.0,2.0,1,"2.041 at full precision",2.0,1
+paper_id,table_figure,claim,value_script,value_paper,match,notes,value_rewrite,match_rewrite,defect_locus
+coppock_2019b,table_2,naive_estimate,-0.035,-0.035,1,,-0.035,1,
+coppock_2019b,table_2,naive_ci_lower,-0.075,-0.075,1,,-0.075,1,
+coppock_2019b,table_2,naive_ci_upper,0.005,0.005,1,,0.005,1,
+coppock_2019b,table_2,redefined_estimate,-0.061,-0.061,1,,-0.061,1,
+coppock_2019b,table_2,redefined_ci_lower,-0.095,-0.095,1,,-0.095,1,
+coppock_2019b,table_2,redefined_ci_upper,-0.027,-0.027,1,,-0.027,1,
+coppock_2019b,table_2,ar_estimate,-0.056,-0.056,1,,-0.056,1,
+coppock_2019b,table_2,ar_ci_lower,-0.104,-0.104,1,,-0.104,1,
+coppock_2019b,table_2,ar_ci_upper,-0.007,-0.007,1,,-0.007,1,
+coppock_2019b,table_2,bounds_low,-0.658,-0.658,1,,-0.658,1,
+coppock_2019b,table_2,bounds_high,0.645,0.645,1,,0.645,1,
+coppock_2019b,table_2,bounds_ci_lower,-0.739,-0.73,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives -0.730, which is the published value",-0.739,0,environment
+coppock_2019b,table_2,bounds_ci_upper,0.725,0.726,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives 0.726, which is the published value",0.725,0,environment
+coppock_2019b,text_p1,response_rate_non_latino,,70.5,,Attributed to White et al. (2015); the deposited script never computes it. The maintained rewrite recovers it from the deposited data on the paper's own analysis frame,70.5,1,
+coppock_2019b,text_p1,response_rate_latino,,64.8,,Attributed to White et al. (2015); the deposited script never computes it,64.8,1,
+coppock_2019b,text_p1,response_rate_difference,,-5.7,,Attributed to White et al. (2015); the deposited script never computes it,-5.7,1,
+coppock_2019b,text_p3,bounds_low_points,-66,-66,1,Text states -66 points; -65.78 at full precision,-66,1,
+coppock_2019b,text_p3,bounds_high_points,65,65,1,Text states 65 points; 64.54 at full precision,65,1,
+coppock_2019b,text_p3,n_ar_pairs,719,719,1,Not printed by the deposited script; 719 distinct pair_id values in the wnf_always_responders object it builds,719,1,
+coppock_2019b,text_p3,ar_estimate_points,-5.6,-5.5,0,"Text states -5.5 points, Table 2 states -0.056; the estimate is -5.563 points, so the text truncates where the table rounds. Internal inconsistency in the article, not a reproduction failure",-5.6,0,paper_internal
+coppock_2019b,text_p3,ar_se_points,2.5,2.5,1,2.482 at full precision,2.5,1,
+coppock_2019b,text_p3,redefined_estimate_points,-6.1,-6,1,Text states a 6 point decrease; -6.100 at full precision,-6.1,1,
+coppock_2019b,text_p3,redefined_se_points,1.8,1.7,0,"Text states SE = 1.7 points; the standard error is 1.756 points, which rounds to 1.8. The text truncates rather than rounds",1.8,0,paper_internal
+coppock_2019b,text_p3,naive_estimate_points,-3.5,-3.5,1,-3.542 at full precision,-3.5,1,
+coppock_2019b,text_p3,naive_se_points,2.0,2.0,1,2.041 at full precision,2.0,1,
