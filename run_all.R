@@ -25,3 +25,10 @@ source(here::here("maintained", "text_response_rates.R"))
 # Three thousand further bootstrap replicates of the bounds estimator, about nine
 # seconds, which is most of the run.
 source(here::here("maintained", "text_bootstrap_sampler.R"))
+
+# Deposited archive, again ----
+# The check at the top of this file is a precondition: it says original/ was intact
+# before anything ran. Nothing above writes to original/, and this second pass is what
+# demonstrates it rather than assuming it. Nothing is downloaded; the files are already
+# present and are re-checked against the manifest on checksum, byte size and membership.
+source(here::here("download_original.R"))
