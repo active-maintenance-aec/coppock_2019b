@@ -1,5 +1,5 @@
-estimand,estimator,estimate,std_error,bounds_low,bounds_high,conf_low,conf_high,n
-Undefined,Naive difference-in-means,-0.03542386576581199,0.020409855600475896,NA,NA,-0.07544890684318824,0.0046011753115642595,2159
-ATE on redefined outcome,Difference-in-means,-0.0609994647348007,0.01756288132898567,NA,NA,-0.09543513298596865,-0.02656379648363276,3195
-ATE among matched pairs in which both members are Always-Responders,Difference-in-means among matched pairs in which both members respond,-0.0556328233657858,0.024819040813456157,NA,NA,-0.10431828452566028,-0.006947362205911335,1438
-ATE among all Always-Responders,Bounds,NA,NA,-0.6578014184397178,0.6453900709219823,-0.7386384996582365,0.7253517471602583,3195
+estimand,estimator,estimate,std_error,bounds_low,bounds_high,conf_low,conf_high,p_value,n
+Undefined,Naive difference-in-means,-0.03542386576581199,0.020409855600475896,NA,NA,-0.07544890684318824,0.0046011753115642595,0.0827728841685707,2159
+ATE on redefined outcome,Difference-in-means,-0.0609994647348007,0.01756288132898567,NA,NA,-0.09543513298596865,-0.02656379648363276,5.211207039370044e-4,3195
+ATE among matched pairs in which both members are Always-Responders,Difference-in-means among matched pairs in which both members respond,-0.0556328233657858,0.024819040813456157,NA,NA,-0.10431828452566028,-0.006947362205911335,0.0251434776251306,1438
+ATE among all Always-Responders,Bounds,NA,NA,-0.6578014184397178,0.6453900709219823,-0.7386384996582365,0.7253517471602583,NA,3195

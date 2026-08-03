@@ -6,7 +6,8 @@
 #   percent for putatively Latino names, a difference of negative 5.7 points. The
 #   deposited script never computes them, so nothing in the archive shows that they can
 #   be recovered from the deposited data. They can, on exactly the analysis frame the
-#   rest of the paper uses.
+#   rest of the paper uses. The p-value on the difference is here because the sentence
+#   calls the difference statistically significant, which is a claim of its own.
 source(here::here("maintained", "helpers.R"))
 
 wnf_subset <- read_rds(here::here("maintained", "output", "wnf_subset.rds"))
@@ -23,12 +24,21 @@ by_arm <- wnf_subset |>
 
 fit_response <- lm_robust(response ~ first_name_latino, data = wnf_subset)
 
+difference <- tidy(fit_response) |>
+  filter(term == "first_name_latino")
+
 response_rates <- by_arm |>
-  transmute(claim = str_c("Response rate, ", arm), value = response_rate, n) |>
+  transmute(claim = str_c("Response rate, ", arm), value = response_rate, n,
+            std_error = NA_real_, conf_low = NA_real_, conf_high = NA_real_,
+            p_value = NA_real_) |>
   bind_rows(tibble(
     claim = "Difference in response rates, percentage points",
-    value = 100 * coef(fit_response)[["first_name_latino"]],
-    n = as.integer(fit_response$nobs)
+    value = 100 * difference$estimate,
+    n = as.integer(fit_response$nobs),
+    std_error = 100 * difference$std.error,
+    conf_low = 100 * difference$conf.low,
+    conf_high = 100 * difference$conf.high,
+    p_value = difference$p.value
   ))
 
 write_csv(response_rates, here::here("maintained", "output", "text_response_rates.csv"))

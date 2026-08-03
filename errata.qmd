@@ -1,0 +1,76 @@
+---
+title: "Errata"
+subtitle: "On Coppock (2019), *Journal of Experimental Political Science* 6(1)"
+format:
+  pdf:
+    output-file: coppock_2019b_errata.pdf
+    geometry: margin=1.25in
+    fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(here)
+library(tidyverse)
+here::i_am("errata.qmd")
+
+results <- read_csv(here("maintained", "output", "table_2_reanalysis.csv"),
+                    show_col_types = FALSE)
+published <- read_csv(here("ground_truth", "published_claims.csv"),
+                      col_types = cols(.default = col_character(),
+                                       value_paper = col_character()))
+
+# Every number inside a corrected sentence below is computed here, from the deposited
+# data, at the time this document is rendered. That includes the numbers that were not
+# wrong: a token carried over from the published sentence is inherited on trust, and
+# rendering the whole sentence from the pipeline is what verifies it.
+estimator_row <- function(estimator_label) {
+  hit <- results[results$estimator == estimator_label, ]
+  stopifnot(nrow(hit) == 1)
+  hit
+}
+
+always_responder <- estimator_row("Difference-in-means among matched pairs in which both members respond")
+redefined <- estimator_row("Difference-in-means")
+
+# One decimal place on the percentage-point scale everywhere, and the article's own
+# minus sign, so a corrected sentence reads like the published one.
+pts <- function(x) str_replace(sprintf("%.1f", 100 * x), "^-", "−")
+
+# Fuller precision, for a reason line rather than a sentence.
+pts3 <- function(x) str_replace(sprintf("%.3f", 100 * x), "^-", "−")
+
+# The article's own Table 2 cell, quoted from the extraction of the published page
+# rather than retyped here.
+table2 <- function(claim_id) {
+  value <- published$value_paper[published$claim_id == claim_id]
+  stopifnot(length(value) == 1)
+  str_replace(value, "^-", "−")
+}
+```
+
+This note lists two corrections to "Avoiding Post-Treatment Bias in Audit Experiments," published in the *Journal of Experimental Political Science* 6(1), 1-4, doi [10.1017/XPS.2018.9](https://doi.org/10.1017/XPS.2018.9). Both are misstated numbers in the reanalysis paragraph on page 3, and **neither changes a conclusion of the paper.** In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2, which carries the same reanalysis, is right in every cell it prints, and the argument the note makes about post-treatment conditioning is unaffected.
+
+Every number in a corrected sentence below is computed from the deposited replication archive ([10.7910/DVN/6NVI9C](https://doi.org/10.7910/DVN/6NVI9C)) at the time this document is rendered, including the numbers that were not wrong. The code and output supporting each correction are at [github.com/active-maintenance-aec/coppock_2019b](https://github.com/active-maintenance-aec/coppock_2019b).
+
+**Every quantity on the percentage-point scale is stated to one decimal place, and bold marks the corrections.** A corrected sentence therefore differs from the published one in more places than it is wrong: the article states the redefined-outcome estimate in whole points, and setting a whole number to one decimal is not a correction. Only what is bold has changed. Where a fuller value matters it is given in the note beneath the entry.
+
+## 1. The Always-Responder estimate disagrees with Table 2
+
+> Under the unverifiable assumption that both pair members would also have responded if the treatment assignment had been switched, I estimate the ATE among this subgroup to be **−5.5** points (SE = 2.5 points).
+
+Corrected:
+
+> Under the unverifiable assumption that both pair members would also have responded if the treatment assignment had been switched, I estimate the ATE among this subgroup to be **`r pts(always_responder$estimate)`** points (SE = `r pts(always_responder$std_error)` points).
+
+Table 2 prints `r table2("t2_ar_estimate")` for the same estimate, which is `r pts(always_responder$estimate)` points. The estimate is `r pts3(always_responder$estimate)` points, so the table rounds and the sentence truncates, and the article disagrees with itself about the number a reader would quote. The standard error is `r pts3(always_responder$std_error)` points and is correct as published.
+
+## 2. The standard error on the redefined outcome
+
+> Finally, using the redefined outcome, I estimate the ATE to be a 6 point decrease in friendliness (SE = **1.7** points).
+
+Corrected:
+
+> Finally, using the redefined outcome, I estimate the ATE to be a `r str_remove(pts(redefined$estimate), "−")` point decrease in friendliness (SE = **`r pts(redefined$std_error)`** points).
+
+Table 2 prints no standard errors, so this figure appears in the article only here. The standard error is `r pts3(redefined$std_error)` points, which rounds to `r pts(redefined$std_error)`; the sentence truncates it, as the sentence before it does. The point estimate is a decrease of `r str_remove(pts3(redefined$estimate), "−")` points, which is correct at the whole-point precision the article states; it is restated above at one decimal, unbolded, and has not changed.

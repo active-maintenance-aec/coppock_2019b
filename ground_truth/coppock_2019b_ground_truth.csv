@@ -1,26 +1,34 @@
-paper_id,table_figure,claim,value_script,value_paper,match,notes,value_rewrite,match_rewrite,defect_locus
-coppock_2019b,table_2,naive_estimate,-0.035,-0.035,1,,-0.035,1,
-coppock_2019b,table_2,naive_ci_lower,-0.075,-0.075,1,,-0.075,1,
-coppock_2019b,table_2,naive_ci_upper,0.005,0.005,1,,0.005,1,
-coppock_2019b,table_2,redefined_estimate,-0.061,-0.061,1,,-0.061,1,
-coppock_2019b,table_2,redefined_ci_lower,-0.095,-0.095,1,,-0.095,1,
-coppock_2019b,table_2,redefined_ci_upper,-0.027,-0.027,1,,-0.027,1,
-coppock_2019b,table_2,ar_estimate,-0.056,-0.056,1,,-0.056,1,
-coppock_2019b,table_2,ar_ci_lower,-0.104,-0.104,1,,-0.104,1,
-coppock_2019b,table_2,ar_ci_upper,-0.007,-0.007,1,,-0.007,1,
-coppock_2019b,table_2,bounds_low,-0.658,-0.658,1,,-0.658,1,
-coppock_2019b,table_2,bounds_high,0.645,0.645,1,,0.645,1,
-coppock_2019b,table_2,bounds_ci_lower,-0.739,-0.73,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives -0.730, which is the published value",-0.739,0,environment
-coppock_2019b,table_2,bounds_ci_upper,0.725,0.726,0,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives 0.726, which is the published value",0.725,0,environment
-coppock_2019b,text_p1,response_rate_non_latino,,70.5,,Attributed to White et al. (2015); the deposited script never computes it. The maintained rewrite recovers it from the deposited data on the paper's own analysis frame,70.5,1,
-coppock_2019b,text_p1,response_rate_latino,,64.8,,Attributed to White et al. (2015); the deposited script never computes it,64.8,1,
-coppock_2019b,text_p1,response_rate_difference,,-5.7,,Attributed to White et al. (2015); the deposited script never computes it,-5.7,1,
-coppock_2019b,text_p3,bounds_low_points,-66,-66,1,Text states -66 points; -65.78 at full precision,-66,1,
-coppock_2019b,text_p3,bounds_high_points,65,65,1,Text states 65 points; 64.54 at full precision,65,1,
-coppock_2019b,text_p3,n_ar_pairs,719,719,1,Not printed by the deposited script; 719 distinct pair_id values in the wnf_always_responders object it builds,719,1,
-coppock_2019b,text_p3,ar_estimate_points,-5.6,-5.5,0,"Text states -5.5 points, Table 2 states -0.056; the estimate is -5.563 points, so the text truncates where the table rounds. Internal inconsistency in the article, not a reproduction failure",-5.6,0,paper_internal
-coppock_2019b,text_p3,ar_se_points,2.5,2.5,1,2.482 at full precision,2.5,1,
-coppock_2019b,text_p3,redefined_estimate_points,-6.1,-6,1,Text states a 6 point decrease; -6.100 at full precision,-6.1,1,
-coppock_2019b,text_p3,redefined_se_points,1.8,1.7,0,"Text states SE = 1.7 points; the standard error is 1.756 points, which rounds to 1.8. The text truncates rather than rounds",1.8,0,paper_internal
-coppock_2019b,text_p3,naive_estimate_points,-3.5,-3.5,1,-3.542 at full precision,-3.5,1,
-coppock_2019b,text_p3,naive_se_points,2.0,2.0,1,2.041 at full precision,2.0,1,
+paper_id,claim_id,table_figure,claim,value_script,value_paper,match,value_rewrite,match_rewrite,holds,defect_locus,notes
+coppock_2019b,intro_rr_nonlatino,"Introduction, p. 1",Share of putatively non-Latino White names that received a response,70.50720100187851,70.5,1,70.50720100187851,1,NA,NA,The deposited script never computes this; value_script is the rate on the analysis frame the deposit itself builds
+coppock_2019b,intro_rr_latino,"Introduction, p. 1",Share of putatively Latino names that received a response,64.83103879849811,64.8,1,64.83103879849811,1,NA,NA,The deposited script never computes this; value_script is the rate on the analysis frame the deposit itself builds
+coppock_2019b,intro_rr_difference,"Introduction, p. 1","Difference in response rates, percentage points",-5.6761622033804,-5.7,1,-5.6761622033803585,1,NA,NA,The deposited script never computes this; value_script is the difference on the analysis frame the deposit itself builds
+coppock_2019b,intro_rr_difference_significant,"Introduction, p. 1",Whether the difference in response rates is statistically significant at the 0.05 level,NA,1,NA,1,NA,1,NA,"The deposit fits no model of response, so it has no verdict here. The rewrite's two-sided p-value on the difference in response rates is the test the sentence claims"
+coppock_2019b,t1_ar_r0,"Table 1, p. 2","Table 1, Always-Responder, R_i(0)",1,1,1,1,1,NA,NA,Read back off the Always-Responder frame rather than asserted
+coppock_2019b,t1_ar_r1,"Table 1, p. 2","Table 1, Always-Responder, R_i(1)",1,1,1,1,1,NA,NA,Read back off the Always-Responder frame rather than asserted
+coppock_2019b,p2_ar_response_rate,"Find Always-Responders, p. 2",Response rate required in both arms under the Always-Responders assumption,100,100,1,100,1,NA,NA,The article's own stated check on the Always-Responders assumption
+coppock_2019b,t2_naive_estimate,"Table 2, p. 3","Table 2, naive difference-in-means, estimate",-0.03542386576581199,-0.035,1,-0.03542386576581199,1,NA,NA,
+coppock_2019b,t2_naive_ci_lower,"Table 2, p. 3","Table 2, naive difference-in-means, lower confidence limit",-0.07544890684318824,-0.075,1,-0.07544890684318824,1,NA,NA,
+coppock_2019b,t2_naive_ci_upper,"Table 2, p. 3","Table 2, naive difference-in-means, upper confidence limit",0.00460117531156425,0.005,1,0.00460117531156425,1,NA,NA,
+coppock_2019b,t2_redefined_estimate,"Table 2, p. 3","Table 2, redefined outcome, estimate",-0.0609994647348007,-0.061,1,-0.0609994647348007,1,NA,NA,
+coppock_2019b,t2_redefined_ci_lower,"Table 2, p. 3","Table 2, redefined outcome, lower confidence limit",-0.09543513298596865,-0.095,1,-0.09543513298596865,1,NA,NA,
+coppock_2019b,t2_redefined_ci_upper,"Table 2, p. 3","Table 2, redefined outcome, upper confidence limit",-0.02656379648363276,-0.027,1,-0.02656379648363276,1,NA,NA,
+coppock_2019b,t2_ar_estimate,"Table 2, p. 3","Table 2, matched-pair Always-Responders, estimate",-0.0556328233657858,-0.056,1,-0.0556328233657858,1,NA,NA,
+coppock_2019b,t2_ar_ci_lower,"Table 2, p. 3","Table 2, matched-pair Always-Responders, lower confidence limit",-0.10431828452566028,-0.104,1,-0.10431828452566028,1,NA,NA,
+coppock_2019b,t2_ar_ci_upper,"Table 2, p. 3","Table 2, matched-pair Always-Responders, upper confidence limit",-0.00694736220591133,-0.007,1,-0.00694736220591133,1,NA,NA,
+coppock_2019b,t2_bounds_low,"Table 2, p. 3","Table 2, bounds, lower bound",-0.6578014184397178,-0.658,1,-0.6578014184397178,1,NA,NA,
+coppock_2019b,t2_bounds_high,"Table 2, p. 3","Table 2, bounds, upper bound",0.6453900709219823,0.645,1,0.6453900709219823,1,NA,NA,
+coppock_2019b,t2_bounds_ci_lower,"Table 2, p. 3","Table 2, bounds, lower bootstrap confidence limit",-0.7386384996582365,-0.73,0,-0.7386384996582365,0,NA,environment,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives -0.730, which is the published value. text_bootstrap_sampler.csv carries all three intervals"
+coppock_2019b,t2_bounds_ci_upper,"Table 2, p. 3","Table 2, bounds, upper bootstrap confidence limit",0.7253517471602583,0.726,0,0.7253517471602583,0,NA,environment,"R 3.6.0 changed sample(); under RNGkind(sample.kind = 'Rounding') the same seed gives 0.726, which is the published value. text_bootstrap_sampler.csv carries all three intervals"
+coppock_2019b,t2_ci_level,"Table 2, p. 3",Confidence level of the Table 2 intervals,95,95,1,94.99999999999997,1,NA,NA,The column header is a claim about the intervals beside it; the level is recovered from the ratio of each half width to its standard error
+coppock_2019b,p3_redefine_zero,"Redefine the outcome, p. 3",Value the redefined outcome takes when no e-mail is sent,0,0,1,0,1,NA,NA,"The redefined outcome's floor, read off the analysis frame"
+coppock_2019b,p3_lower_bound_points,"Reanalysis, p. 3","Zhang and Rubin lower bound, percentage points",-65.78014184397179,-66,1,-65.78014184397179,1,NA,NA,The article rounds to whole points; -65.78 at full precision
+coppock_2019b,p3_upper_bound_points,"Reanalysis, p. 3","Zhang and Rubin upper bound, percentage points",64.53900709219823,65,1,64.53900709219823,1,NA,NA,The article rounds to whole points; 64.54 at full precision
+coppock_2019b,p3_matched_pairs,"Reanalysis, p. 3",Matched pairs in which both members responded,719,719,1,719,1,NA,NA,"Distinct pair identifiers among the Always-Responder pairs. One pair contributes an odd number of surviving rows, so halving the row count would give 719.5"
+coppock_2019b,p3_ar_ate_points,"Reanalysis, p. 3","Always-Responder ATE, percentage points",-5.56328233657858,-5.5,0,-5.56328233657858,0,NA,paper_internal,"The text states -5.5 points and Table 2 states -0.056 for the same estimate. It is -5.563 points, so the table rounds and the text truncates. An inconsistency inside the article, not a reproduction failure"
+coppock_2019b,p3_ar_se_points,"Reanalysis, p. 3","Always-Responder standard error, percentage points",2.481904081345615,2.5,1,2.481904081345615,1,NA,NA,2.482 at full precision
+coppock_2019b,p3_redefined_ate_points,"Reanalysis, p. 3","Redefined-outcome ATE, percentage points",-6.09994647348007,-6,1,-6.09994647348007,1,NA,NA,The article states a 6 point decrease; -6.100 at full precision
+coppock_2019b,p3_redefined_se_points,"Reanalysis, p. 3","Redefined-outcome standard error, percentage points",1.7562881328985671,1.7,0,1.7562881328985671,0,NA,paper_internal,"The text states SE = 1.7 points. It is 1.756 points, which rounds to 1.8; the text truncates. Table 2 prints no standard errors, so this figure appears only in prose"
+coppock_2019b,p3_significance_contrast,"Reanalysis, p. 3",Whether the redefined-outcome interval excludes zero while the naive interval contains it,NA,1,NA,1,NA,1,NA,Evaluated here from the two p-values; in_text_claims.R evaluates the same contrast from the two confidence intervals. The deposit prints no p-values
+coppock_2019b,p3_naive_ate_points,"Reanalysis, p. 3","Naive ATE, percentage points",-3.542386576581199,-3.5,1,-3.542386576581199,1,NA,NA,-3.542 at full precision
+coppock_2019b,p3_naive_se_points,"Reanalysis, p. 3","Naive standard error, percentage points",2.040985560047589,2.0,1,2.040985560047589,1,NA,NA,2.041 at full precision
+coppock_2019b,p3_four_estimates,"Reanalysis, p. 3",Estimates displayed in Table 2,4,4,1,4,1,NA,NA,Estimator rows in the reproduced Table 2

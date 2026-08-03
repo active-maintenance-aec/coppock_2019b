@@ -27,7 +27,7 @@ difference_in_means <- fits |>
   map(\(fit) tidy(fit) |> filter(term == "first_name_latino")) |>
   list_rbind(names_to = "estimator_id") |>
   transmute(estimator_id, estimate, std_error = std.error, conf_low = conf.low,
-            conf_high = conf.high,
+            conf_high = conf.high, p_value = p.value,
             n = map_int(fits, \(fit) as.integer(fit$nobs)))
 
 # Bounds and their bootstrap confidence interval ----
@@ -68,12 +68,13 @@ results <- difference_in_means |>
     std_error = NA_real_,
     conf_low = bounds_ci$conf_low,
     conf_high = bounds_ci$conf_high,
+    p_value = NA_real_,
     n = nrow(wnf_subset),
     bounds_low = bounds_point$low_est,
     bounds_high = bounds_point$high_est
   )) |>
   right_join(labels, by = "estimator_id") |>
   select(estimand, estimator, estimate, std_error, bounds_low, bounds_high,
-         conf_low, conf_high, n)
+         conf_low, conf_high, p_value, n)
 
 write_csv(results, here::here("maintained", "output", "table_2_reanalysis.csv"))

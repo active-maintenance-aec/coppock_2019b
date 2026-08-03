@@ -1,0 +1,53 @@
+claim_id,location,claim_type,value_paper,needs_block,claim,notes
+intro_rr_nonlatino,"Introduction, p. 1",pipeline,70.5,TRUE,Share of putatively non-Latino White names that received a response,"Attributed in the sentence to White et al. (2015); the deposited script never computes it, and it is recoverable from the deposited data on the article's own analysis frame"
+intro_rr_latino,"Introduction, p. 1",pipeline,64.8,TRUE,Share of putatively Latino names that received a response,Attributed in the sentence to White et al. (2015); the deposited script never computes it
+intro_rr_difference,"Introduction, p. 1",pipeline,-5.7,TRUE,"Difference in response rates, percentage points","The article states the sign in words, as a difference of negative 5.7 percentage points"
+intro_rr_difference_significant,"Introduction, p. 1",descriptive,1,TRUE,Whether the difference in response rates is statistically significant at the 0.05 level,"The sentence calls the difference statistically and substantively significant; 1 records that the claim holds. Substantive significance is not a computable quantity and is not tested"
+t1_ar_r0,"Table 1, p. 2",definitional,1,TRUE,"Table 1, Always-Responder, R_i(0)","Recoverable: the response rate under the non-Latino White name among the units the rewrite classifies as Always-Responders"
+t1_ar_r1,"Table 1, p. 2",definitional,1,TRUE,"Table 1, Always-Responder, R_i(1)",Recoverable: the response rate under the Latino name among the same units
+t1_itr_r0,"Table 1, p. 2",definitional,0,FALSE,"Table 1, If-Treated-Responder, R_i(0)",A stipulated principal stratum; no deposited or maintained script identifies its members
+t1_itr_r1,"Table 1, p. 2",definitional,1,FALSE,"Table 1, If-Treated-Responder, R_i(1)",A stipulated principal stratum; no deposited or maintained script identifies its members
+t1_iur_r0,"Table 1, p. 2",definitional,1,FALSE,"Table 1, If-Untreated-Responder, R_i(0)",A stipulated principal stratum; no deposited or maintained script identifies its members
+t1_iur_r1,"Table 1, p. 2",definitional,0,FALSE,"Table 1, If-Untreated-Responder, R_i(1)",A stipulated principal stratum; no deposited or maintained script identifies its members
+t1_nr_r0,"Table 1, p. 2",definitional,0,FALSE,"Table 1, Never-Responder, R_i(0)",A stipulated principal stratum; no deposited or maintained script identifies its members
+t1_nr_r1,"Table 1, p. 2",definitional,0,FALSE,"Table 1, Never-Responder, R_i(1)",A stipulated principal stratum; no deposited or maintained script identifies its members
+p2_costa_conditioning,"Post-treatment conditioning, p. 2",transcribed,7,FALSE,Legislative audit experiments in Costa (2017) that condition on response,A property of Costa's meta-analysis; nothing in this deposit can move it
+p2_costa_total,"Post-treatment conditioning, p. 2",transcribed,20,FALSE,Legislative audit experiments analyzed in Costa (2017),A property of Costa's meta-analysis; nothing in this deposit can move it
+p2_quillian_conditioning,"Post-treatment conditioning, p. 2",transcribed,9,FALSE,Employment audit studies in Quillian et al. (2017) that condition on response,A property of Quillian et al.'s meta-analysis; nothing in this deposit can move it
+p2_quillian_total,"Post-treatment conditioning, p. 2",transcribed,29,FALSE,Employment audit studies analyzed in Quillian et al. (2017),A property of Quillian et al.'s meta-analysis; nothing in this deposit can move it
+p2_subject_types,"Types of subjects, p. 2",structural,4,FALSE,Principal strata a subject can belong to,The four rows of Table 1; the typology is stipulated and no script builds it
+p2_z_control,"Types of subjects, p. 2",definitional,0,FALSE,Treatment code for a putatively non-Latino White name,"Verified at the point of use: first_name_latino is 0 for the arm whose response rate is the 70.5 the article attributes to non-Latino White names, which intro_rr_nonlatino checks"
+p2_z_treated,"Types of subjects, p. 2",definitional,1,FALSE,Treatment code for a putatively Latino name,"Verified at the point of use: first_name_latino is 1 for the arm whose response rate is the 64.8 the article attributes to Latino names, which intro_rr_latino checks"
+p2_ar_condition,"Types of subjects, p. 2",definitional,1,FALSE,The Always-Responder conditioning event R_i(0) = R_i(1) = 1,The same statement as Table 1's Always-Responder row; covered there
+p2_analyst_choices,"Analysts' choices, p. 2",structural,3,FALSE,Approaches the note sets out,"Spelled out in the article as three main choices; a property of the argument, not of the pipeline"
+p2_ar_response_rate,"Find Always-Responders, p. 2",definitional,100,TRUE,Response rate required in both arms under the Always-Responders assumption,Recoverable: the rewrite's Always-Responder frame is built to satisfy it and the block reads the rate back out of the frame rather than asserting it
+t2_naive_estimate,"Table 2, p. 3",pipeline,-0.035,TRUE,"Table 2, naive difference-in-means, estimate",
+t2_naive_ci_lower,"Table 2, p. 3",pipeline,-0.075,TRUE,"Table 2, naive difference-in-means, lower confidence limit",
+t2_naive_ci_upper,"Table 2, p. 3",pipeline,0.005,TRUE,"Table 2, naive difference-in-means, upper confidence limit",
+t2_redefined_estimate,"Table 2, p. 3",pipeline,-0.061,TRUE,"Table 2, redefined outcome, estimate",
+t2_redefined_ci_lower,"Table 2, p. 3",pipeline,-0.095,TRUE,"Table 2, redefined outcome, lower confidence limit",
+t2_redefined_ci_upper,"Table 2, p. 3",pipeline,-0.027,TRUE,"Table 2, redefined outcome, upper confidence limit",
+t2_ar_estimate,"Table 2, p. 3",pipeline,-0.056,TRUE,"Table 2, matched-pair Always-Responders, estimate",
+t2_ar_ci_lower,"Table 2, p. 3",pipeline,-0.104,TRUE,"Table 2, matched-pair Always-Responders, lower confidence limit",
+t2_ar_ci_upper,"Table 2, p. 3",pipeline,-0.007,TRUE,"Table 2, matched-pair Always-Responders, upper confidence limit",
+t2_bounds_low,"Table 2, p. 3",pipeline,-0.658,TRUE,"Table 2, bounds, lower bound",
+t2_bounds_high,"Table 2, p. 3",pipeline,0.645,TRUE,"Table 2, bounds, upper bound",
+t2_bounds_ci_lower,"Table 2, p. 3",pipeline,-0.73,TRUE,"Table 2, bounds, lower bootstrap confidence limit","The article prints two decimals here and three elsewhere in the column, so the comparison is made at two"
+t2_bounds_ci_upper,"Table 2, p. 3",pipeline,0.726,TRUE,"Table 2, bounds, upper bootstrap confidence limit",
+t2_ci_level,"Table 2, p. 3",definitional,95,TRUE,Confidence level of the Table 2 intervals,"Recoverable: the ratio of each interval's half width to its standard error is 1.9611 on 2,157 degrees of freedom, which is the 95 per cent multiplier"
+p3_redefine_response,"Redefine the outcome, p. 3",definitional,1,FALSE,Value of R_i(Z) at which the redefined outcome equals the original outcome,The response indicator's coding; covered at the point of use by p3_redefine_zero
+p3_redefine_zero,"Redefine the outcome, p. 3",definitional,0,TRUE,Value the redefined outcome takes when no e-mail is sent,Recoverable: the largest value the redefined outcome takes among non-responders in the rewrite's analysis frame
+p3_white_footnote,"Redefine the outcome, p. 3",structural,29,FALSE,Footnote of White et al. (2015) reporting the same analysis,A pointer into another article
+p3_three_approaches,"Reanalysis, p. 3",structural,3,FALSE,"Approaches illustrated in the reanalysis, restated",Spelled out in the article as all three approaches
+p3_lower_bound_points,"Reanalysis, p. 3",pipeline,-66,TRUE,"Zhang and Rubin lower bound, percentage points",
+p3_upper_bound_points,"Reanalysis, p. 3",pipeline,65,TRUE,"Zhang and Rubin upper bound, percentage points",
+p3_matched_pairs,"Reanalysis, p. 3",pipeline,719,TRUE,Matched pairs in which both members responded,
+p3_ar_ate_points,"Reanalysis, p. 3",pipeline,-5.5,TRUE,"Always-Responder ATE, percentage points",
+p3_ar_se_points,"Reanalysis, p. 3",pipeline,2.5,TRUE,"Always-Responder standard error, percentage points",
+p3_redefined_ate_points,"Reanalysis, p. 3",pipeline,-6,TRUE,"Redefined-outcome ATE, percentage points","The article states the sign in words, as a 6 point decrease in friendliness"
+p3_redefined_se_points,"Reanalysis, p. 3",pipeline,1.7,TRUE,"Redefined-outcome standard error, percentage points",
+p3_significance_contrast,"Reanalysis, p. 3",descriptive,1,TRUE,Whether the redefined-outcome interval excludes zero while the naive interval contains it,1 records that the claim holds
+p3_naive_ate_points,"Reanalysis, p. 3",pipeline,-3.5,TRUE,"Naive ATE, percentage points",
+p3_naive_se_points,"Reanalysis, p. 3",pipeline,2.0,TRUE,"Naive standard error, percentage points",
+p3_four_estimates,"Reanalysis, p. 3",structural,4,TRUE,Estimates displayed in Table 2,Recoverable: the number of rows the rewrite's Table 2 carries
+p3_three_solutions,"Conclusion, p. 3",structural,3,FALSE,"Solutions to the problem, restated in the conclusion",Spelled out in the article as the three solutions

@@ -1,0 +1,27 @@
+quantity,value
+naive estimate,-0.03542386576581199
+naive conf low,-0.07544890684318824
+naive conf high,0.0046011753115642595
+naive std error,0.020409855600475896
+redefined estimate,-0.0609994647348007
+redefined conf low,-0.09543513298596865
+redefined conf high,-0.02656379648363276
+redefined std error,0.01756288132898567
+always responder estimate,-0.0556328233657858
+always responder conf low,-0.10431828452566028
+always responder conf high,-0.006947362205911335
+always responder std error,0.024819040813456157
+bounds low,-0.6578014184397178
+bounds high,0.6453900709219823
+bounds conf low,-0.7386384996582365
+bounds conf high,0.7253517471602583
+naive degrees of freedom,2157
+matched pairs both responding,719
+"response rate, non-Latino White arm",70.50720100187851
+"response rate, Latino arm",64.83103879849811
+difference in response rates,-5.6761622033804
+"always responder response rate, non-Latino White arm",1
+"always responder response rate, Latino arm",1
+"always responder response rate, pooled",100
+redefined outcome maximum among non-responders,0
+estimator rows in the assembled table,4

@@ -11,7 +11,10 @@
   - [The bootstrap](#the-bootstrap)
   - [The renamed tidy columns](#the-renamed-tidy-columns)
   - [The filename](#the-filename)
+- [Errata](#errata)
 - [Number-by-number comparison](#number-by-number-comparison)
+- [The extraction and the two
+  instruments](#the-extraction-and-the-two-instruments)
 - [The bootstrap interval and the R 3.6
   sampler](#the-bootstrap-interval-and-the-r-36-sampler)
 - [Maintained rewrite](#maintained-rewrite)
@@ -48,10 +51,14 @@ in version control even though the bytes themselves are not.
 script per published table or set of in-text quantities, writing to
 `output/`, which is committed so a reader can compare a fresh run
 against it without downloading anything. `ground_truth/` ties every
-published number to the code that produces it. `original/` is created by
-the download script and is deliberately absent from the repository. This
-file is the reproducibility report, also available as a PDF in
-`report/`.
+published number to the code that produces it: `published_claims.csv` is
+the extraction of every number the article prints,
+`extract_archive_values.R` runs the deposited script, and
+`build_ground_truth.R` assembles the comparison and gates it.
+`original/` is created by the download script and is deliberately absent
+from the repository. `errata.qmd` renders the two corrections the
+article needs. This file is the reproducibility report, also available
+as a PDF in `report/`.
 
 **License.** CC0 1.0 Universal, matching the terms of the deposit this
 repository maintains. See `LICENSE`.
@@ -63,14 +70,16 @@ repository maintains. See `LICENSE`.
 source("run_all.R")
 ```
 
-That fetches the deposit, verifies its four files, and produces the
-published table and every in-text quantity into `maintained/output/`.
-Required packages: tidyverse, estimatr, rsample, knitr, kableExtra,
-here. Paths resolve through `here`, so nothing depends on the working
-directory. The full run takes about twelve seconds, most of it in the
-3,000 bootstrap replicates of the bounds estimator. A successful run
-overwrites `maintained/output/`, which is committed: **`git diff` on
-that folder is the reproduction check.**
+That fetches the deposit, verifies its four files, produces the
+published table and every in-text quantity into `maintained/output/`,
+runs the deposited script in a scratch directory, rebuilds the ground
+truth with its coverage gates, and prints one line per numeric claim the
+article makes. Required packages: tidyverse, estimatr, rsample, broom,
+xtable, knitr, kableExtra, here. Paths resolve through `here`, so
+nothing depends on the working directory. The run takes well under a
+minute, most of it in the 4,000 bootstrap replicates of the bounds
+estimator. A successful run overwrites `maintained/output/`, which is
+committed: **`git diff` on that folder is the reproduction check.**
 
 # Summary
 
@@ -97,7 +106,7 @@ script on its first line for anyone not working on macOS or Windows: the
 deposited file is `voterIDexp_data_sept2014.RData`.
 
 Both are mechanical and resolvable without the author. Ten lines in four
-places make it run to completion, and 18 of the 22 published values it
+places make it run to completion, and 27 of the 31 published values it
 can be checked against come back. The 4 that do not are described below,
 and none of the four is the archive’s fault: two belong to R and two to
 the article’s own prose.
@@ -108,10 +117,11 @@ Yes, on every quantity the paper’s own analysis produces. Every
 estimate, confidence interval and standard error in Table 2 and in the
 article’s prose reproduces to the precision the article prints, and so
 do the three response rates on the first page, which the deposited
-script never computed at all.
+script never computes at all. Both of the article’s descriptive claims
+about statistical significance hold.
 
-Three of the 25 checkable rows carry `match_rewrite = 0`, and none of
-the three is a reproduction failure.
+4 of the 31 checkable rows carry `match_rewrite = 0`, and none of the
+four is a reproduction failure.
 
 Two are the endpoints of the bootstrap confidence interval on the
 bounds. R 3.6.0 changed how `sample()` converts uniform draws into
@@ -121,7 +131,8 @@ than it did in 2018. Restoring the old sampler with
 exactly. The drift is the sampler, not the bootstrap package: the two
 are shown below to draw identically.
 
-The third is an inconsistency inside the article. Table 2 reports the
+The other two are inconsistencies inside the article, and they are the
+subject of the errata note this repository carries. Table 2 reports the
 Always-Responder estimate as $-0.056$ and the text on the same page
 reports it as $-5.5$ points. The estimate is $-5.563$ points, so the
 table rounds and the text truncates. The same truncation appears one
@@ -218,45 +229,158 @@ the first line for anyone running on Linux. This defect is invisible to
 the author and to any reviewer working on the same platform, which is
 exactly what makes it worth recording.
 
+# Errata
+
+Two sentences in the article state a number the deposited data do not
+support, and both are in the reanalysis paragraph on page 3. Neither
+changes a conclusion. `errata.qmd` sets them out and renders to
+`coppock_2019b_errata.pdf` at the root of this repository, computing
+every corrected value from `maintained/output/` at the moment it is
+rendered, so the note cannot go stale in the way the sentences did.
+
+Both are the same defect. The article gives the Always-Responder
+estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the
+standard error on the redefined outcome as 1.7 points where the standard
+error is 1.756. In each case the published figure is the correct value
+truncated rather than rounded at the last digit it prints. Table 2 is
+right in every cell it prints, which is why the errata quotes its cells
+rather than reprinting it.
+
+That is a separate matter from the repairs described above, which are to
+the deposited *code*. No analytical decision in the deposit was changed,
+and the rewrite corrects no coding error, because there is none to
+correct.
+
 # Number-by-number comparison
 
-| Location | Claim                     | Paper  | Archive | Match |
-|:---------|:--------------------------|:-------|:--------|:------|
-| table_2  | naive_estimate            | -0.035 | -0.035  | 1     |
-| table_2  | naive_ci_lower            | -0.075 | -0.075  | 1     |
-| table_2  | naive_ci_upper            | 0.005  | 0.005   | 1     |
-| table_2  | redefined_estimate        | -0.061 | -0.061  | 1     |
-| table_2  | redefined_ci_lower        | -0.095 | -0.095  | 1     |
-| table_2  | redefined_ci_upper        | -0.027 | -0.027  | 1     |
-| table_2  | ar_estimate               | -0.056 | -0.056  | 1     |
-| table_2  | ar_ci_lower               | -0.104 | -0.104  | 1     |
-| table_2  | ar_ci_upper               | -0.007 | -0.007  | 1     |
-| table_2  | bounds_low                | -0.658 | -0.658  | 1     |
-| table_2  | bounds_high               | 0.645  | 0.645   | 1     |
-| table_2  | bounds_ci_lower           | -0.73  | -0.739  | 0     |
-| table_2  | bounds_ci_upper           | 0.726  | 0.725   | 0     |
-| text_p1  | response_rate_non_latino  | 70.5   |         |       |
-| text_p1  | response_rate_latino      | 64.8   |         |       |
-| text_p1  | response_rate_difference  | -5.7   |         |       |
-| text_p3  | bounds_low_points         | -66    | -66     | 1     |
-| text_p3  | bounds_high_points        | 65     | 65      | 1     |
-| text_p3  | n_ar_pairs                | 719    | 719     | 1     |
-| text_p3  | ar_estimate_points        | -5.5   | -5.6    | 0     |
-| text_p3  | ar_se_points              | 2.5    | 2.5     | 1     |
-| text_p3  | redefined_estimate_points | -6     | -6.1    | 1     |
-| text_p3  | redefined_se_points       | 1.7    | 1.8     | 0     |
-| text_p3  | naive_estimate_points     | -3.5   | -3.5    | 1     |
-| text_p3  | naive_se_points           | 2      | 2       | 1     |
+| Location | Claim | Paper | Archive | Match |
+|:---|:---|:---|:---|:---|
+| Introduction, p. 1 | Share of putatively non-Latino White names that received a response | 70.5 | 70.50720000 | 1 |
+| Introduction, p. 1 | Share of putatively Latino names that received a response | 64.8 | 64.83100000 | 1 |
+| Introduction, p. 1 | Difference in response rates, percentage points | -5.7 | -5.67616000 | 1 |
+| Introduction, p. 1 | Whether the difference in response rates is statistically significant at the 0.05 level | 1 | NA |  |
+| Table 1, p. 2 | Table 1, Always-Responder, R_i(0) | 1 | 1.00000000 | 1 |
+| Table 1, p. 2 | Table 1, Always-Responder, R_i(1) | 1 | 1.00000000 | 1 |
+| Find Always-Responders, p. 2 | Response rate required in both arms under the Always-Responders assumption | 100 | 100.00000000 | 1 |
+| Table 2, p. 3 | Table 2, naive difference-in-means, estimate | -0.035 | -0.03542390 | 1 |
+| Table 2, p. 3 | Table 2, naive difference-in-means, lower confidence limit | -0.075 | -0.07544890 | 1 |
+| Table 2, p. 3 | Table 2, naive difference-in-means, upper confidence limit | 0.005 | 0.00460118 | 1 |
+| Table 2, p. 3 | Table 2, redefined outcome, estimate | -0.061 | -0.06099950 | 1 |
+| Table 2, p. 3 | Table 2, redefined outcome, lower confidence limit | -0.095 | -0.09543510 | 1 |
+| Table 2, p. 3 | Table 2, redefined outcome, upper confidence limit | -0.027 | -0.02656380 | 1 |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, estimate | -0.056 | -0.05563280 | 1 |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, lower confidence limit | -0.104 | -0.10431800 | 1 |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, upper confidence limit | -0.007 | -0.00694736 | 1 |
+| Table 2, p. 3 | Table 2, bounds, lower bound | -0.658 | -0.65780100 | 1 |
+| Table 2, p. 3 | Table 2, bounds, upper bound | 0.645 | 0.64539000 | 1 |
+| Table 2, p. 3 | Table 2, bounds, lower bootstrap confidence limit | -0.73 | -0.73863800 | 0 |
+| Table 2, p. 3 | Table 2, bounds, upper bootstrap confidence limit | 0.726 | 0.72535200 | 0 |
+| Table 2, p. 3 | Confidence level of the Table 2 intervals | 95 | 95.00000000 | 1 |
+| Redefine the outcome, p. 3 | Value the redefined outcome takes when no e-mail is sent | 0 | 0.00000000 | 1 |
+| Reanalysis, p. 3 | Zhang and Rubin lower bound, percentage points | -66 | -65.78010000 | 1 |
+| Reanalysis, p. 3 | Zhang and Rubin upper bound, percentage points | 65 | 64.53900000 | 1 |
+| Reanalysis, p. 3 | Matched pairs in which both members responded | 719 | 719.00000000 | 1 |
+| Reanalysis, p. 3 | Always-Responder ATE, percentage points | -5.5 | -5.56328000 | 0 |
+| Reanalysis, p. 3 | Always-Responder standard error, percentage points | 2.5 | 2.48190000 | 1 |
+| Reanalysis, p. 3 | Redefined-outcome ATE, percentage points | -6 | -6.09995000 | 1 |
+| Reanalysis, p. 3 | Redefined-outcome standard error, percentage points | 1.7 | 1.75629000 | 0 |
+| Reanalysis, p. 3 | Whether the redefined-outcome interval excludes zero while the naive interval contains it | 1 | NA |  |
+| Reanalysis, p. 3 | Naive ATE, percentage points | -3.5 | -3.54239000 | 1 |
+| Reanalysis, p. 3 | Naive standard error, percentage points | 2.0 | 2.04099000 | 1 |
+| Reanalysis, p. 3 | Estimates displayed in Table 2 | 4 | 4.00000000 | 1 |
 
 Ground truth: published value against the value the repaired archive
 script produces on current R. Published values are read from the
 article; a blank Archive column means the deposited script never
 computes the quantity.
 
-Of the 25 recorded claims, 22 can be compared against something the
-repaired archive produces. 18 match and 4 do not. The remaining 3 are
-the three response rates the article’s first page attributes to White et
-al. (2015), which the deposited script never computes.
+Of the 33 recorded claims, 31 can be compared against something the
+repaired archive produces. 27 match and 4 do not. The other 2 are the
+article’s two claims about statistical significance, which have no
+number to compare and carry a truth value instead; both hold.
+
+`value_script` is not typed here.
+`ground_truth/extract_archive_values.R` copies the deposit into a
+scratch directory, applies the four repairs described above to its own
+source text, runs it there, and writes what it produces to
+`ground_truth/archive_values.csv`, which is what this column reads.
+Three of the values in that file are counts and rates of the two frames
+the deposited cleaning code builds rather than results the deposited
+script prints: the article’s three opening response rates are among
+them, and recording them as the deposit’s own is the claim that the
+deposit’s data support the figures the article attributes to White,
+Nathan and Faller (2015).
+
+# The extraction and the two instruments
+
+`ground_truth/published_claims.csv` is the extraction: every numeric
+token in the article’s four published pages, read out with its
+surrounding context and then classified by hand, followed by a second
+sweep for numbers written as words, which no token scan sees. Citation
+years, DOI numerals, running heads and the publisher’s own front matter
+are the only tokens excluded. The article has no separate appendix.
+
+| Class        | Claims | Requiring a block |
+|:-------------|-------:|------------------:|
+| definitional |     15 |                 5 |
+| descriptive  |      2 |                 2 |
+| pipeline     |     25 |                25 |
+| structural   |      6 |                 1 |
+| transcribed  |      4 |                 0 |
+
+The extraction, by claim type. A pipeline or descriptive claim must have
+a ground-truth row and a block in the claims file; a definitional,
+structural or transcribed claim gets a block only where the pipeline can
+reach the quantity, and is otherwise verified at the point of use.
+
+Coverage of the two published tables is stated as a fraction rather than
+as an existence check, because one row is not coverage of a float. All
+14 of Table 2’s published numbers are covered, counting its confidence
+level. 2 of Table 1’s 8 are: Table 1 is a stipulated typology of
+principal strata, and only the Always-Responder row names units any
+analysis identifies. The other three strata are verified nowhere, which
+is a property of the paper rather than a gap in this repository.
+
+`maintained/in_text_claims.R` is the second instrument. It carries one
+block per claim, each with the article’s own sentence quoted verbatim
+above code that recomputes the number from `maintained/output/` and
+prints it at the precision the article prints. It never reads the ground
+truth, never refits a model, and where `build_ground_truth.R` reaches a
+quantity through one output file it reaches the same quantity through
+another: the percentage-point figures come from the Table 2 estimates
+rather than from `text_in_text_estimates.csv`, the pair count and the
+response rates from the analysis frames, and the two significance claims
+from the confidence intervals where the ground truth uses the p-values.
+Agreement between two derivations is evidence the arithmetic is right;
+it is not evidence that the quantity is the one the sentence names,
+which is what writing the block out of the sentence is for.
+
+`build_ground_truth.R` then gates the whole arrangement. It sources the
+claims file as a program into its own environment and counts the claim
+lines it prints, so a block that errors, or that ends in a bare
+expression and prints nothing under `source()`, fails rather than
+passing as coverage. It asserts that the 33 printed claim ids are
+exactly the 33 the extraction declares, that every pipeline and
+descriptive claim has a ground-truth row, that no ground-truth row names
+a claim the article does not make, and that the two instruments agree
+value by value at the article’s own precision. It also asserts that
+every row carrying an adverse verdict has a `defect_locus` and that no
+clean row has one, reading all three of `match`, `match_rewrite` and
+`holds`, since a gate stated on the rewrite alone cannot see a failing
+descriptive claim or an archive failure the rewrite passes.
+
+| Location | Claim | Paper | Rewrite | Locus |
+|:---|:---|:---|:---|:---|
+| Table 2, p. 3 | Table 2, bounds, lower bootstrap confidence limit | -0.73 | -0.739 | environment |
+| Table 2, p. 3 | Table 2, bounds, upper bootstrap confidence limit | 0.726 | 0.725 | environment |
+| Reanalysis, p. 3 | Always-Responder ATE, percentage points | -5.5 | -5.563 | paper_internal |
+| Reanalysis, p. 3 | Redefined-outcome standard error, percentage points | 1.7 | 1.756 | paper_internal |
+
+Every row whose verdict is adverse, and where the fault lies.
+
+2 are the environment, and 2 are the article disagreeing with itself.
+Neither is a defect in the deposited code and neither is a defect in the
+rewrite.
 
 # The bootstrap interval and the R 3.6 sampler
 
@@ -313,6 +437,7 @@ specification and sample restriction is the one the paper used.
 | text_in_text_estimates.R | text_in_text_estimates.csv | The bounds, the pair count and each estimator in percentage points |
 | text_response_rates.R | text_response_rates.csv | The response rates the first page attributes to White et al. (2015) |
 | text_bootstrap_sampler.R | text_bootstrap_sampler.csv | The bounds interval under three resampling routes |
+| in_text_claims.R | (printed claim lines only) | One block per numeric claim the article makes, recomputed and printed |
 
 Maintained rewrite scripts.
 
@@ -404,41 +529,53 @@ to one decimal.
 
 # Maintained rewrite verification
 
-| Location | Claim | Paper | Rewrite | Match | Note |
+| Location | Claim | Paper | Rewrite | Verdict | Note |
 |:---|:---|:---|:---|:---|:---|
-| table_2 | naive_estimate | -0.035 | -0.035 | 1 |  |
-| table_2 | naive_ci_lower | -0.075 | -0.075 | 1 |  |
-| table_2 | naive_ci_upper | 0.005 | 0.005 | 1 |  |
-| table_2 | redefined_estimate | -0.061 | -0.061 | 1 |  |
-| table_2 | redefined_ci_lower | -0.095 | -0.095 | 1 |  |
-| table_2 | redefined_ci_upper | -0.027 | -0.027 | 1 |  |
-| table_2 | ar_estimate | -0.056 | -0.056 | 1 |  |
-| table_2 | ar_ci_lower | -0.104 | -0.104 | 1 |  |
-| table_2 | ar_ci_upper | -0.007 | -0.007 | 1 |  |
-| table_2 | bounds_low | -0.658 | -0.658 | 1 |  |
-| table_2 | bounds_high | 0.645 | 0.645 | 1 |  |
-| table_2 | bounds_ci_lower | -0.73 | -0.739 | 0 | R 3.6.0 changed sample(); under RNGkind(sample.kind = ‘Rounding’) the same seed gives -0.730, which is the published value |
-| table_2 | bounds_ci_upper | 0.726 | 0.725 | 0 | R 3.6.0 changed sample(); under RNGkind(sample.kind = ‘Rounding’) the same seed gives 0.726, which is the published value |
-| text_p1 | response_rate_non_latino | 70.5 | 70.5 | 1 | Attributed to White et al. (2015); the deposited script never computes it. The maintained rewrite recovers it from the deposited data on the paper’s own analysis frame |
-| text_p1 | response_rate_latino | 64.8 | 64.8 | 1 | Attributed to White et al. (2015); the deposited script never computes it |
-| text_p1 | response_rate_difference | -5.7 | -5.7 | 1 | Attributed to White et al. (2015); the deposited script never computes it |
-| text_p3 | bounds_low_points | -66 | -66 | 1 | Text states -66 points; -65.78 at full precision |
-| text_p3 | bounds_high_points | 65 | 65 | 1 | Text states 65 points; 64.54 at full precision |
-| text_p3 | n_ar_pairs | 719 | 719 | 1 | Not printed by the deposited script; 719 distinct pair_id values in the wnf_always_responders object it builds |
-| text_p3 | ar_estimate_points | -5.5 | -5.6 | 0 | Text states -5.5 points, Table 2 states -0.056; the estimate is -5.563 points, so the text truncates where the table rounds. Internal inconsistency in the article, not a reproduction failure |
-| text_p3 | ar_se_points | 2.5 | 2.5 | 1 | 2.482 at full precision |
-| text_p3 | redefined_estimate_points | -6 | -6.1 | 1 | Text states a 6 point decrease; -6.100 at full precision |
-| text_p3 | redefined_se_points | 1.7 | 1.8 | 0 | Text states SE = 1.7 points; the standard error is 1.756 points, which rounds to 1.8. The text truncates rather than rounds |
-| text_p3 | naive_estimate_points | -3.5 | -3.5 | 1 | -3.542 at full precision |
-| text_p3 | naive_se_points | 2 | 2 | 1 | 2.041 at full precision |
+| Introduction, p. 1 | Share of putatively non-Latino White names that received a response | 70.5 | 70.50720000 | 1 | The deposited script never computes this; value_script is the rate on the analysis frame the deposit itself builds |
+| Introduction, p. 1 | Share of putatively Latino names that received a response | 64.8 | 64.83100000 | 1 | The deposited script never computes this; value_script is the rate on the analysis frame the deposit itself builds |
+| Introduction, p. 1 | Difference in response rates, percentage points | -5.7 | -5.67616000 | 1 | The deposited script never computes this; value_script is the difference on the analysis frame the deposit itself builds |
+| Introduction, p. 1 | Whether the difference in response rates is statistically significant at the 0.05 level | 1 | 1.00000000 | 1 | The deposit fits no model of response, so it has no verdict here. The rewrite’s two-sided p-value on the difference in response rates is the test the sentence claims |
+| Table 1, p. 2 | Table 1, Always-Responder, R_i(0) | 1 | 1.00000000 | 1 | Read back off the Always-Responder frame rather than asserted |
+| Table 1, p. 2 | Table 1, Always-Responder, R_i(1) | 1 | 1.00000000 | 1 | Read back off the Always-Responder frame rather than asserted |
+| Find Always-Responders, p. 2 | Response rate required in both arms under the Always-Responders assumption | 100 | 100.00000000 | 1 | The article’s own stated check on the Always-Responders assumption |
+| Table 2, p. 3 | Table 2, naive difference-in-means, estimate | -0.035 | -0.03542390 | 1 |  |
+| Table 2, p. 3 | Table 2, naive difference-in-means, lower confidence limit | -0.075 | -0.07544890 | 1 |  |
+| Table 2, p. 3 | Table 2, naive difference-in-means, upper confidence limit | 0.005 | 0.00460118 | 1 |  |
+| Table 2, p. 3 | Table 2, redefined outcome, estimate | -0.061 | -0.06099950 | 1 |  |
+| Table 2, p. 3 | Table 2, redefined outcome, lower confidence limit | -0.095 | -0.09543510 | 1 |  |
+| Table 2, p. 3 | Table 2, redefined outcome, upper confidence limit | -0.027 | -0.02656380 | 1 |  |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, estimate | -0.056 | -0.05563280 | 1 |  |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, lower confidence limit | -0.104 | -0.10431800 | 1 |  |
+| Table 2, p. 3 | Table 2, matched-pair Always-Responders, upper confidence limit | -0.007 | -0.00694736 | 1 |  |
+| Table 2, p. 3 | Table 2, bounds, lower bound | -0.658 | -0.65780100 | 1 |  |
+| Table 2, p. 3 | Table 2, bounds, upper bound | 0.645 | 0.64539000 | 1 |  |
+| Table 2, p. 3 | Table 2, bounds, lower bootstrap confidence limit | -0.73 | -0.73863800 | 0 | R 3.6.0 changed sample(); under RNGkind(sample.kind = ‘Rounding’) the same seed gives -0.730, which is the published value. text_bootstrap_sampler.csv carries all three intervals |
+| Table 2, p. 3 | Table 2, bounds, upper bootstrap confidence limit | 0.726 | 0.72535200 | 0 | R 3.6.0 changed sample(); under RNGkind(sample.kind = ‘Rounding’) the same seed gives 0.726, which is the published value. text_bootstrap_sampler.csv carries all three intervals |
+| Table 2, p. 3 | Confidence level of the Table 2 intervals | 95 | 95.00000000 | 1 | The column header is a claim about the intervals beside it; the level is recovered from the ratio of each half width to its standard error |
+| Redefine the outcome, p. 3 | Value the redefined outcome takes when no e-mail is sent | 0 | 0.00000000 | 1 | The redefined outcome’s floor, read off the analysis frame |
+| Reanalysis, p. 3 | Zhang and Rubin lower bound, percentage points | -66 | -65.78010000 | 1 | The article rounds to whole points; -65.78 at full precision |
+| Reanalysis, p. 3 | Zhang and Rubin upper bound, percentage points | 65 | 64.53900000 | 1 | The article rounds to whole points; 64.54 at full precision |
+| Reanalysis, p. 3 | Matched pairs in which both members responded | 719 | 719.00000000 | 1 | Distinct pair identifiers among the Always-Responder pairs. One pair contributes an odd number of surviving rows, so halving the row count would give 719.5 |
+| Reanalysis, p. 3 | Always-Responder ATE, percentage points | -5.5 | -5.56328000 | 0 | The text states -5.5 points and Table 2 states -0.056 for the same estimate. It is -5.563 points, so the table rounds and the text truncates. An inconsistency inside the article, not a reproduction failure |
+| Reanalysis, p. 3 | Always-Responder standard error, percentage points | 2.5 | 2.48190000 | 1 | 2.482 at full precision |
+| Reanalysis, p. 3 | Redefined-outcome ATE, percentage points | -6 | -6.09995000 | 1 | The article states a 6 point decrease; -6.100 at full precision |
+| Reanalysis, p. 3 | Redefined-outcome standard error, percentage points | 1.7 | 1.75629000 | 0 | The text states SE = 1.7 points. It is 1.756 points, which rounds to 1.8; the text truncates. Table 2 prints no standard errors, so this figure appears only in prose |
+| Reanalysis, p. 3 | Whether the redefined-outcome interval excludes zero while the naive interval contains it | 1 | 1.00000000 | 1 | Evaluated here from the two p-values; in_text_claims.R evaluates the same contrast from the two confidence intervals. The deposit prints no p-values |
+| Reanalysis, p. 3 | Naive ATE, percentage points | -3.5 | -3.54239000 | 1 | -3.542 at full precision |
+| Reanalysis, p. 3 | Naive standard error, percentage points | 2.0 | 2.04099000 | 1 | 2.041 at full precision |
+| Reanalysis, p. 3 | Estimates displayed in Table 2 | 4 | 4.00000000 | 1 | Estimator rows in the reproduced Table 2 |
 
 Maintained rewrite verification: published value against rewrite output.
+The verdict is the rewrite’s match, except on the two descriptive
+claims, which have no number to compare and carry a truth value instead.
 
-**21** of the 25 checkable claims match the published article to the
-precision it prints. The 4 that do not are the two bootstrap endpoints,
-which the R 3.6 sampler change explains and the old sampler restores,
-and the Always-Responder estimate in points, where the article’s own
-text and its own table disagree with each other.
+**27** of the 31 checkable claims match the published article to the
+precision it prints, and both of the 2 descriptive claims hold. The 4
+that do not match are the two bootstrap endpoints, which the R 3.6
+sampler change explains and the old sampler restores, and the two
+figures in the reanalysis paragraph where the article’s own prose
+disagrees with its own table and with the estimates behind it. Those two
+are the errata.
 
 # R environment
 
@@ -446,7 +583,7 @@ text and its own table disagree with each other.
 |:----------|:-----------------------|
 | R version | 4.6.0                  |
 | Platform  | aarch64-apple-darwin23 |
-| Date run  | 2026-08-01             |
+| Date run  | 2026-08-03             |
 
 | Package  | Version |
 |:---------|:--------|

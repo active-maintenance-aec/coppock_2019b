@@ -32,8 +32,22 @@ latex_out <- knitr::is_latex_output()
 # table renders as a pipe table. Each call site says what LaTeX alone gets.
 latex_only <- function(k, f) if (latex_out) f(k) else k
 
+# value_paper carries the string the article prints, so the column type is forced. Left
+# to guess it, readr returns a double and the article's 2.0 comes back as 2.
 gt <- read_csv(here::here("ground_truth", "coppock_2019b_ground_truth.csv"),
-               show_col_types = FALSE)
+               col_types = cols(.default = col_double(),
+                                paper_id = col_character(),
+                                claim_id = col_character(),
+                                table_figure = col_character(),
+                                claim = col_character(),
+                                value_paper = col_character(),
+                                defect_locus = col_character(),
+                                notes = col_character()))
+
+claims <- read_csv(here::here("ground_truth", "published_claims.csv"),
+                   col_types = cols(.default = col_character(),
+                                    value_paper = col_character())) |>
+  mutate(needs_block = needs_block == "TRUE")
 
 results <- read_csv(here::here("maintained", "output", "table_2_reanalysis.csv"),
                     show_col_types = FALSE)
@@ -57,7 +71,7 @@ This repository holds the actively maintained replication code for Coppock (2019
 
 **The data are not redistributed here.** The deposit is 1.3 MB across four files and lives at Harvard Dataverse, which is the only copy this repository points at. `download_original.R` fetches it and verifies every file; `original_manifest.csv` pins the file identifiers, sizes and checksums, so the exact bytes this code was written against are recorded in version control even though the bytes themselves are not.
 
-**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it. `original/` is created by the download script and is deliberately absent from the repository. This file is the reproducibility report, also available as a PDF in `report/`.
+**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it: `published_claims.csv` is the extraction of every number the article prints, `extract_archive_values.R` runs the deposited script, and `build_ground_truth.R` assembles the comparison and gates it. `original/` is created by the download script and is deliberately absent from the repository. `errata.qmd` renders the two corrections the article needs. This file is the reproducibility report, also available as a PDF in `report/`.
 
 **License.** CC0 1.0 Universal, matching the terms of the deposit this repository maintains. See `LICENSE`.
 
@@ -67,7 +81,7 @@ This repository holds the actively maintained replication code for Coppock (2019
 source("run_all.R")
 ```
 
-That fetches the deposit, verifies its four files, and produces the published table and every in-text quantity into `maintained/output/`. Required packages: tidyverse, estimatr, rsample, knitr, kableExtra, here. Paths resolve through `here`, so nothing depends on the working directory. The full run takes about twelve seconds, most of it in the 3,000 bootstrap replicates of the bounds estimator. A successful run overwrites `maintained/output/`, which is committed: **`git diff` on that folder is the reproduction check.**
+That fetches the deposit, verifies its four files, produces the published table and every in-text quantity into `maintained/output/`, runs the deposited script in a scratch directory, rebuilds the ground truth with its coverage gates, and prints one line per numeric claim the article makes. Required packages: tidyverse, estimatr, rsample, broom, xtable, knitr, kableExtra, here. Paths resolve through `here`, so nothing depends on the working directory. The run takes well under a minute, most of it in the 4,000 bootstrap replicates of the bounds estimator. A successful run overwrites `maintained/output/`, which is committed: **`git diff` on that folder is the reproduction check.**
 
 # Summary
 
@@ -79,7 +93,21 @@ n_archive_fail <- sum(gt$match == 0, na.rm = TRUE)
 n_rewrite_verifiable <- sum(!is.na(gt$match_rewrite))
 n_rewrite_match <- sum(gt$match_rewrite == 1, na.rm = TRUE)
 n_rewrite_fail <- sum(gt$match_rewrite == 0, na.rm = TRUE)
-n_unverifiable <- sum(is.na(gt$match))
+n_descriptive <- sum(!is.na(gt$holds))
+n_descriptive_hold <- sum(gt$holds == 1, na.rm = TRUE)
+n_environment <- sum(gt$defect_locus == "environment", na.rm = TRUE)
+n_paper_internal <- sum(gt$defect_locus == "paper_internal", na.rm = TRUE)
+n_needs_block <- sum(claims$needs_block)
+
+float_coverage <- claims |>
+  filter(str_starts(location, "Table")) |>
+  mutate(float = str_extract(location, "^Table \\d+")) |>
+  summarize(published_cells = n(), covered_cells = sum(claim_id %in% gt$claim_id),
+            .by = float)
+
+covered <- function(float_name, column) {
+  float_coverage[[column]][float_coverage$float == float_name]
+}
 ```
 
 Two questions, answered before the detail.
@@ -94,13 +122,13 @@ Both are mechanical and resolvable without the author. Ten lines in four places 
 
 ## Does the maintained rewrite reproduce the paper?
 
-Yes, on every quantity the paper's own analysis produces. Every estimate, confidence interval and standard error in Table 2 and in the article's prose reproduces to the precision the article prints, and so do the three response rates on the first page, which the deposited script never computed at all.
+Yes, on every quantity the paper's own analysis produces. Every estimate, confidence interval and standard error in Table 2 and in the article's prose reproduces to the precision the article prints, and so do the three response rates on the first page, which the deposited script never computes at all. Both of the article's descriptive claims about statistical significance hold.
 
-Three of the `r n_rewrite_verifiable` checkable rows carry `match_rewrite = 0`, and none of the three is a reproduction failure.
+`r n_rewrite_fail` of the `r n_rewrite_verifiable` checkable rows carry `match_rewrite = 0`, and none of the four is a reproduction failure.
 
 Two are the endpoints of the bootstrap confidence interval on the bounds. R 3.6.0 changed how `sample()` converts uniform draws into integers, so the archive's `set.seed(343)` selects different resamples than it did in 2018. Restoring the old sampler with `RNGkind(sample.kind = "Rounding")` returns the published interval exactly. The drift is the sampler, not the bootstrap package: the two are shown below to draw identically.
 
-The third is an inconsistency inside the article. Table 2 reports the Always-Responder estimate as $-0.056$ and the text on the same page reports it as $-5.5$ points. The estimate is $-5.563$ points, so the table rounds and the text truncates. The same truncation appears one sentence later, where the standard error on the redefined outcome is stated as 1.7 points against an actual 1.756.
+The other two are inconsistencies inside the article, and they are the subject of the errata note this repository carries. Table 2 reports the Always-Responder estimate as $-0.056$ and the text on the same page reports it as $-5.5$ points. The estimate is $-5.563$ points, so the table rounds and the text truncates. The same truncation appears one sentence later, where the standard error on the redefined outcome is stated as 1.7 points against an actual 1.756.
 
 # Paper overview
 
@@ -176,11 +204,24 @@ cis <- c(paste0("[", round(fit_1$ci_lower[2], 3), ", ", ...))
 
 `load("voterIDexp_data_sept2014.Rdata")` asks for a file the deposit spells `voterIDexp_data_sept2014.RData`. It resolves on macOS and Windows, whose filesystems are case-insensitive by default, and fails on the first line for anyone running on Linux. This defect is invisible to the author and to any reviewer working on the same platform, which is exactly what makes it worth recording.
 
+# Errata
+
+Two sentences in the article state a number the deposited data do not support, and both are in the reanalysis paragraph on page 3. Neither changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
+
+Both are the same defect. The article gives the Always-Responder estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the standard error on the redefined outcome as 1.7 points where the standard error is 1.756. In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2 is right in every cell it prints, which is why the errata quotes its cells rather than reprinting it.
+
+That is a separate matter from the repairs described above, which are to the deposited *code*. No analytical decision in the deposit was changed, and the rewrite corrects no coding error, because there is none to correct.
+
 # Number-by-number comparison
 
 ```{r gt_table}
+# value_script and value_rewrite are committed at full precision so that nothing is
+# rounded twice; six significant digits is what a reader wants to see beside a published
+# value carried at the article's own precision.
+readable <- function(x) replace_na(format(signif(x, 6), trim = TRUE), "")
+
 gt |>
-  mutate(across(everything(), \(x) replace_na(as.character(x), ""))) |>
+  mutate(value_script = readable(value_script), match = replace_na(as.character(match), "")) |>
   select(table_figure, claim, value_paper, value_script, match) |>
   kable(
     booktabs = TRUE,
@@ -192,7 +233,52 @@ gt |>
     column_spec(2, width = "5cm"))
 ```
 
-Of the `r n_claims` recorded claims, `r n_archive_verifiable` can be compared against something the repaired archive produces. `r n_archive_match` match and `r n_archive_fail` do not. The remaining `r n_unverifiable` are the three response rates the article's first page attributes to White et al. (2015), which the deposited script never computes.
+Of the `r n_claims` recorded claims, `r n_archive_verifiable` can be compared against something the repaired archive produces. `r n_archive_match` match and `r n_archive_fail` do not. The other `r n_descriptive` are the article's two claims about statistical significance, which have no number to compare and carry a truth value instead; both hold.
+
+`value_script` is not typed here. `ground_truth/extract_archive_values.R` copies the deposit into a scratch directory, applies the four repairs described above to its own source text, runs it there, and writes what it produces to `ground_truth/archive_values.csv`, which is what this column reads. Three of the values in that file are counts and rates of the two frames the deposited cleaning code builds rather than results the deposited script prints: the article's three opening response rates are among them, and recording them as the deposit's own is the claim that the deposit's data support the figures the article attributes to White, Nathan and Faller (2015).
+
+# The extraction and the two instruments
+
+`ground_truth/published_claims.csv` is the extraction: every numeric token in the article's four published pages, read out with its surrounding context and then classified by hand, followed by a second sweep for numbers written as words, which no token scan sees. Citation years, DOI numerals, running heads and the publisher's own front matter are the only tokens excluded. The article has no separate appendix.
+
+```{r extraction_table}
+claims |>
+  count(claim_type, name = "claims") |>
+  left_join(claims |> filter(needs_block) |> count(claim_type, name = "with_block"),
+            by = "claim_type") |>
+  mutate(with_block = replace_na(with_block, 0L)) |>
+  kable(
+    booktabs = TRUE,
+    col.names = c("Class", "Claims", "Requiring a block"),
+    caption = "The extraction, by claim type. A pipeline or descriptive claim must have a ground-truth row and a block in the claims file; a definitional, structural or transcribed claim gets a block only where the pipeline can reach the quantity, and is otherwise verified at the point of use."
+  ) |>
+  latex_only(\(k) k |>
+    kable_styling(latex_options = "hold_position", font_size = 9) |>
+    column_spec(1, width = "5cm"))
+```
+
+Coverage of the two published tables is stated as a fraction rather than as an existence check, because one row is not coverage of a float. All `r covered("Table 2", "published_cells")` of Table 2's published numbers are covered, counting its confidence level. `r covered("Table 1", "covered_cells")` of Table 1's `r covered("Table 1", "published_cells")` are: Table 1 is a stipulated typology of principal strata, and only the Always-Responder row names units any analysis identifies. The other three strata are verified nowhere, which is a property of the paper rather than a gap in this repository.
+
+`maintained/in_text_claims.R` is the second instrument. It carries one block per claim, each with the article's own sentence quoted verbatim above code that recomputes the number from `maintained/output/` and prints it at the precision the article prints. It never reads the ground truth, never refits a model, and where `build_ground_truth.R` reaches a quantity through one output file it reaches the same quantity through another: the percentage-point figures come from the Table 2 estimates rather than from `text_in_text_estimates.csv`, the pair count and the response rates from the analysis frames, and the two significance claims from the confidence intervals where the ground truth uses the p-values. Agreement between two derivations is evidence the arithmetic is right; it is not evidence that the quantity is the one the sentence names, which is what writing the block out of the sentence is for.
+
+`build_ground_truth.R` then gates the whole arrangement. It sources the claims file as a program into its own environment and counts the claim lines it prints, so a block that errors, or that ends in a bare expression and prints nothing under `source()`, fails rather than passing as coverage. It asserts that the `r n_needs_block` printed claim ids are exactly the `r n_needs_block` the extraction declares, that every pipeline and descriptive claim has a ground-truth row, that no ground-truth row names a claim the article does not make, and that the two instruments agree value by value at the article's own precision. It also asserts that every row carrying an adverse verdict has a `defect_locus` and that no clean row has one, reading all three of `match`, `match_rewrite` and `holds`, since a gate stated on the rewrite alone cannot see a failing descriptive claim or an archive failure the rewrite passes.
+
+```{r locus_table}
+gt |>
+  filter(!is.na(defect_locus)) |>
+  select(table_figure, claim, value_paper, value_rewrite, defect_locus) |>
+  mutate(value_rewrite = sprintf("%.3f", value_rewrite)) |>
+  kable(
+    booktabs = TRUE,
+    col.names = c("Location", "Claim", "Paper", "Rewrite", "Locus"),
+    caption = "Every row whose verdict is adverse, and where the fault lies."
+  ) |>
+  latex_only(\(k) k |>
+    kable_styling(latex_options = "hold_position", font_size = 8) |>
+    column_spec(2, width = "5cm"))
+```
+
+`r n_environment` are the environment, and `r n_paper_internal` are the article disagreeing with itself. Neither is a defect in the deposited code and neither is a defect in the rewrite.
 
 # The bootstrap interval and the R 3.6 sampler
 
@@ -232,7 +318,8 @@ tibble(
     "table_2_reanalysis.R",
     "text_in_text_estimates.R",
     "text_response_rates.R",
-    "text_bootstrap_sampler.R"
+    "text_bootstrap_sampler.R",
+    "in_text_claims.R"
   ),
   output = c(
     "(sourced by every script)",
@@ -240,7 +327,8 @@ tibble(
     "table_2_reanalysis.csv",
     "text_in_text_estimates.csv",
     "text_response_rates.csv",
-    "text_bootstrap_sampler.csv"
+    "text_bootstrap_sampler.csv",
+    "(printed claim lines only)"
   ),
   description = c(
     "Packages and the Zhang and Rubin bounds estimator",
@@ -248,7 +336,8 @@ tibble(
     "The four estimators of Table 2, at full precision",
     "The bounds, the pair count and each estimator in percentage points",
     "The response rates the first page attributes to White et al. (2015)",
-    "The bounds interval under three resampling routes"
+    "The bounds interval under three resampling routes",
+    "One block per numeric claim the article makes, recomputed and printed"
   )
 ) |>
   kable(
@@ -273,7 +362,7 @@ The bounds estimator is the one place where the rewrite reimplements rather than
 
 ```{r response_rate_table}
 response_rates |>
-  mutate(value = sprintf("%.1f", value)) |>
+  transmute(claim, value = sprintf("%.1f", value), n) |>
   kable(
     booktabs = TRUE,
     col.names = c("Quantity", "Rewrite", "N"),
@@ -367,12 +456,16 @@ in_text |>
 
 ```{r rewrite_verify}
 gt |>
-  mutate(across(everything(), \(x) replace_na(as.character(x), ""))) |>
-  select(table_figure, claim, value_paper, value_rewrite, match_rewrite, notes) |>
+  mutate(
+    value_rewrite = readable(value_rewrite),
+    verdict = replace_na(as.character(coalesce(match_rewrite, holds)), ""),
+    notes = replace_na(notes, "")
+  ) |>
+  select(table_figure, claim, value_paper, value_rewrite, verdict, notes) |>
   kable(
     booktabs = TRUE,
-    col.names = c("Location", "Claim", "Paper", "Rewrite", "Match", "Note"),
-    caption = "Maintained rewrite verification: published value against rewrite output."
+    col.names = c("Location", "Claim", "Paper", "Rewrite", "Verdict", "Note"),
+    caption = "Maintained rewrite verification: published value against rewrite output. The verdict is the rewrite's match, except on the two descriptive claims, which have no number to compare and carry a truth value instead."
   ) |>
   latex_only(\(k) k |>
     kable_styling(latex_options = c("hold_position", "repeat_header"), font_size = 6) |>
@@ -380,7 +473,7 @@ gt |>
     column_spec(6, width = "6cm"))
 ```
 
-**`r n_rewrite_match`** of the `r n_rewrite_verifiable` checkable claims match the published article to the precision it prints. The `r n_rewrite_fail` that do not are the two bootstrap endpoints, which the R 3.6 sampler change explains and the old sampler restores, and the Always-Responder estimate in points, where the article's own text and its own table disagree with each other.
+**`r n_rewrite_match`** of the `r n_rewrite_verifiable` checkable claims match the published article to the precision it prints, and both of the `r n_descriptive` descriptive claims hold. The `r n_rewrite_fail` that do not match are the two bootstrap endpoints, which the R 3.6 sampler change explains and the old sampler restores, and the two figures in the reanalysis paragraph where the article's own prose disagrees with its own table and with the estimates behind it. Those two are the errata.
 
 # R environment
 
