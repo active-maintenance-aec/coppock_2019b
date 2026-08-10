@@ -25,6 +25,13 @@ library(kableExtra)
 
 here::i_am("README.qmd")
 
+# The errata spine, defined once in errata.qmd and written out by it. This report reads it
+# rather than keeping its own count, so the two cannot disagree about how many entries there
+# are.
+spine <- read_csv(here("errata_entries.csv"), show_col_types = FALSE)
+n_errata_word <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                   "ten", "eleven", "twelve")[nrow(spine)]
+
 # kableExtra styling is LaTeX-only; the GitHub README build takes plain pipe tables.
 latex_out <- knitr::is_latex_output()
 
@@ -71,7 +78,7 @@ This repository holds the actively maintained replication code for Coppock (2019
 
 **The data are not redistributed here.** The deposit is 1.3 MB across four files and lives at Harvard Dataverse, which is the only copy this repository points at. `download_original.R` fetches it and verifies every file; `original_manifest.csv` pins the file identifiers, sizes and checksums, so the exact bytes this code was written against are recorded in version control even though the bytes themselves are not.
 
-**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it: `published_claims.csv` is the extraction of every number the article prints, `extract_archive_values.R` runs the deposited script, and `build_ground_truth.R` assembles the comparison and gates it. `original/` is created by the download script and is deliberately absent from the repository. `errata.qmd` renders the two corrections the article needs. This file is the reproducibility report, also available as a PDF in `report/`.
+**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it: `published_claims.csv` is the extraction of every number the article prints, `extract_archive_values.R` runs the deposited script, and `build_ground_truth.R` assembles the comparison and gates it. `original/` is created by the download script and is deliberately absent from the repository. `errata.qmd` renders the `r n_errata_word` corrections the article needs. This file is the reproducibility report, also available as a PDF in `report/`.
 
 **License.** CC0 1.0 Universal, matching the terms of the deposit this repository maintains. See `LICENSE`.
 
@@ -206,7 +213,7 @@ cis <- c(paste0("[", round(fit_1$ci_lower[2], 3), ", ", ...))
 
 # Errata
 
-Two sentences in the article state a number the deposited data do not support, and both are in the reanalysis paragraph on page 3. Neither changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
+`r str_to_sentence(n_errata_word)` sentences in the article state a number the deposited data do not support, and both are in the reanalysis paragraph on page 3. Neither changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
 
 Both are the same defect. The article gives the Always-Responder estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the standard error on the redefined outcome as 1.7 points where the standard error is 1.756. In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2 is right in every cell it prints, which is why the errata quotes its cells rather than reprinting it.
 

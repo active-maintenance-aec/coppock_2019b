@@ -583,7 +583,7 @@ are the errata.
 |:----------|:-----------------------|
 | R version | 4.6.0                  |
 | Platform  | aarch64-apple-darwin23 |
-| Date run  | 2026-08-03             |
+| Date run  | 2026-08-10             |
 
 | Package  | Version |
 |:---------|:--------|
