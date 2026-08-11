@@ -64,8 +64,14 @@ table2 <- function(claim_id) {
 #
 # A published or corrected value that the pipeline computes stays computed: the field is
 # built with str_glue() so the number is produced when this document renders, not typed.
+#
+# claim_ids is the semicolon-separated list of ground-truth claim_id values the entry
+# corrects, and it is what makes "is this finding published?" a query rather than a reading
+# of every note. It is empty where an entry has no ground-truth row, which is normal for a
+# bibliographic or structural entry. ground_truth/build_ground_truth.R refuses to build if
+# any id here is absent from the ground truth.
 entries <- tribble(
-  ~entry, ~class, ~source, ~form, ~title, ~location, ~published, ~corrected, ~note,
+  ~entry, ~class, ~source, ~form, ~title, ~location, ~published, ~corrected, ~note, ~claim_ids,
 
   1, "quantity", "pipeline", "full",
   "The Always-Responder estimate disagrees with Table 2",
@@ -79,6 +85,7 @@ entries <- tribble(
     "truncates, and the article disagrees with itself about the number a reader would quote. ",
     "The standard error is {pts3(always_responder$std_error)} points and is correct as ",
     "published."),
+  "p3_ar_ate_points",
 
   2, "quantity", "pipeline", "full",
   "The standard error on the redefined outcome",
@@ -91,11 +98,24 @@ entries <- tribble(
     "{pts(redefined$std_error)}; the sentence truncates it, as the sentence before it does. ",
     "The point estimate is a decrease of {str_remove(pts3(redefined$estimate), '−')} points, ",
     "which is correct at the whole-point precision the article states; it is restated above ",
-    "at one decimal, unbolded, and has not changed.")
+    "at one decimal, unbolded, and has not changed."),
+  "p3_redefined_se_points"
 ) |>
   mutate(across(c(title, published, corrected, note), as.character))
 
 stopifnot(nrow(entries) == max(entries$entry), !anyDuplicated(entries$entry))
+
+# Every id an entry claims to correct must be a real ground-truth claim. The build gate in
+# ground_truth/build_ground_truth.R checks the same property from the other side; checking it
+# here too means a dangling id cannot survive a render.
+gt_ids <- read_csv(here("ground_truth", "coppock_2019b_ground_truth.csv"),
+                   show_col_types = FALSE)$claim_id
+cited_ids <- entries$claim_ids |>
+  str_split(";") |>
+  unlist() |>
+  str_trim() |>
+  discard(\(x) is.na(x) | x == "")
+stopifnot(all(cited_ids %in% gt_ids))
 
 # The prose below counts the entries in words, as the note has always done.
 n_entries_word <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
