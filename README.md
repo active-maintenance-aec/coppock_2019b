@@ -56,7 +56,7 @@ the extraction of every number the article prints,
 `extract_archive_values.R` runs the deposited script, and
 `build_ground_truth.R` assembles the comparison and gates it.
 `original/` is created by the download script and is deliberately absent
-from the repository. `errata.qmd` renders the two corrections the
+from the repository. `errata.qmd` renders the three corrections the
 article needs. This file is the reproducibility report, also available
 as a PDF in `report/`.
 
@@ -131,8 +131,8 @@ than it did in 2018. Restoring the old sampler with
 exactly. The drift is the sampler, not the bootstrap package: the two
 are shown below to draw identically.
 
-The other two are inconsistencies inside the article, and they are the
-subject of the errata note this repository carries. Table 2 reports the
+The other two are inconsistencies inside the article, and each is an
+entry in the errata note this repository carries. Table 2 reports the
 Always-Responder estimate as $-0.056$ and the text on the same page
 reports it as $-5.5$ points. The estimate is $-5.563$ points, so the
 table rounds and the text truncates. The same truncation appears one
@@ -231,20 +231,27 @@ exactly what makes it worth recording.
 
 # Errata
 
-Two sentences in the article state a number the deposited data do not
-support, and both are in the reanalysis paragraph on page 3. Neither
-changes a conclusion. `errata.qmd` sets them out and renders to
-`coppock_2019b_errata.pdf` at the root of this repository, computing
-every corrected value from `maintained/output/` at the moment it is
-rendered, so the note cannot go stale in the way the sentences did.
+The article needs three corrections, all of them in the reanalysis
+paragraph on page 3, and none of them changes a conclusion. `errata.qmd`
+sets them out and renders to `coppock_2019b_errata.pdf` at the root of
+this repository, computing every corrected value from
+`maintained/output/` at the moment it is rendered, so the note cannot go
+stale in the way the sentences did.
 
-Both are the same defect. The article gives the Always-Responder
+Two of them are the same defect. The article gives the Always-Responder
 estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the
 standard error on the redefined outcome as 1.7 points where the standard
 error is 1.756. In each case the published figure is the correct value
 truncated rather than rounded at the last digit it prints. Table 2 is
 right in every cell it prints, which is why the errata quotes its cells
 rather than reprinting it.
+
+The third is a dropped word rather than a wrong number. The same
+paragraph gives the naive estimate as $-3.5$ percentage, with no unit,
+where every other figure around it is in points. It came out of reading
+the article word by word against its own PDF to prepare a remastered
+edition, which is a finer sieve than the number-by-number comparison
+below.
 
 That is a separate matter from the repairs described above, which are to
 the deposited *code*. No analytical decision in the deposit was changed,
@@ -575,7 +582,7 @@ that do not match are the two bootstrap endpoints, which the R 3.6
 sampler change explains and the old sampler restores, and the two
 figures in the reanalysis paragraph where the article’s own prose
 disagrees with its own table and with the estimates behind it. Those two
-are the errata.
+are the first two errata.
 
 # R environment
 
@@ -583,11 +590,11 @@ are the errata.
 |:----------|:-----------------------|
 | R version | 4.6.0                  |
 | Platform  | aarch64-apple-darwin23 |
-| Date run  | 2026-08-10             |
+| Date run  | 2026-09-11             |
 
 | Package  | Version |
 |:---------|:--------|
-| estimatr | 1.0.6   |
+| estimatr | 2.0.0   |
 | rsample  | 1.3.2   |
 | dplyr    | 1.2.1   |
 | tidyr    | 1.3.2   |

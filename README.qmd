@@ -135,7 +135,7 @@ Yes, on every quantity the paper's own analysis produces. Every estimate, confid
 
 Two are the endpoints of the bootstrap confidence interval on the bounds. R 3.6.0 changed how `sample()` converts uniform draws into integers, so the archive's `set.seed(343)` selects different resamples than it did in 2018. Restoring the old sampler with `RNGkind(sample.kind = "Rounding")` returns the published interval exactly. The drift is the sampler, not the bootstrap package: the two are shown below to draw identically.
 
-The other two are inconsistencies inside the article, and they are the subject of the errata note this repository carries. Table 2 reports the Always-Responder estimate as $-0.056$ and the text on the same page reports it as $-5.5$ points. The estimate is $-5.563$ points, so the table rounds and the text truncates. The same truncation appears one sentence later, where the standard error on the redefined outcome is stated as 1.7 points against an actual 1.756.
+The other two are inconsistencies inside the article, and each is an entry in the errata note this repository carries. Table 2 reports the Always-Responder estimate as $-0.056$ and the text on the same page reports it as $-5.5$ points. The estimate is $-5.563$ points, so the table rounds and the text truncates. The same truncation appears one sentence later, where the standard error on the redefined outcome is stated as 1.7 points against an actual 1.756.
 
 # Paper overview
 
@@ -213,9 +213,11 @@ cis <- c(paste0("[", round(fit_1$ci_lower[2], 3), ", ", ...))
 
 # Errata
 
-`r str_to_sentence(n_errata_word)` sentences in the article state a number the deposited data do not support, and both are in the reanalysis paragraph on page 3. Neither changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
+The article needs `r n_errata_word` corrections, all of them in the reanalysis paragraph on page 3, and none of them changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
 
-Both are the same defect. The article gives the Always-Responder estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the standard error on the redefined outcome as 1.7 points where the standard error is 1.756. In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2 is right in every cell it prints, which is why the errata quotes its cells rather than reprinting it.
+Two of them are the same defect. The article gives the Always-Responder estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the standard error on the redefined outcome as 1.7 points where the standard error is 1.756. In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2 is right in every cell it prints, which is why the errata quotes its cells rather than reprinting it.
+
+The third is a dropped word rather than a wrong number. The same paragraph gives the naive estimate as $-3.5$ percentage, with no unit, where every other figure around it is in points. It came out of reading the article word by word against its own PDF to prepare a remastered edition, which is a finer sieve than the number-by-number comparison below.
 
 That is a separate matter from the repairs described above, which are to the deposited *code*. No analytical decision in the deposit was changed, and the rewrite corrects no coding error, because there is none to correct.
 
@@ -480,7 +482,7 @@ gt |>
     column_spec(6, width = "6cm"))
 ```
 
-**`r n_rewrite_match`** of the `r n_rewrite_verifiable` checkable claims match the published article to the precision it prints, and both of the `r n_descriptive` descriptive claims hold. The `r n_rewrite_fail` that do not match are the two bootstrap endpoints, which the R 3.6 sampler change explains and the old sampler restores, and the two figures in the reanalysis paragraph where the article's own prose disagrees with its own table and with the estimates behind it. Those two are the errata.
+**`r n_rewrite_match`** of the `r n_rewrite_verifiable` checkable claims match the published article to the precision it prints, and both of the `r n_descriptive` descriptive claims hold. The `r n_rewrite_fail` that do not match are the two bootstrap endpoints, which the R 3.6 sampler change explains and the old sampler restores, and the two figures in the reanalysis paragraph where the article's own prose disagrees with its own table and with the estimates behind it. Those two are the first two errata.
 
 # R environment
 
