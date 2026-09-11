@@ -41,6 +41,20 @@ pts <- function(x) str_replace(sprintf("%.1f", 100 * x), "^-", "−")
 # Fuller precision, for a reason line rather than a sentence.
 pts3 <- function(x) str_replace(sprintf("%.3f", 100 * x), "^-", "−")
 
+# The bounds confidence interval, which is the one quantity in Table 2 the maintained
+# rewrite does not return: R 3.6.0 changed sample(), so the published pair is reproduced
+# by the archive's own resampling scheme under the sampler the 2018 run used. The ground
+# truth records the same thing at t2_bounds_ci_lower and t2_bounds_ci_upper, where the
+# defect locus is `environment` rather than anything the paper did.
+bootstrap <- read_csv(here("maintained", "output", "text_bootstrap_sampler.csv"),
+                      show_col_types = FALSE)
+archive_boot <- bootstrap[bootstrap$method == "Archive resampling scheme, pre-3.6 sampler", ]
+stopifnot(nrow(archive_boot) == 1)
+
+# A Table 2 cell on the article's own scale: three decimal places, which is what every
+# other limit in the 95% CI column is given to, and the article's own minus sign.
+cell <- function(x) str_replace(sprintf("%.3f", x), "^-", "−")
+
 # The article's own Table 2 cell, quoted from the extraction of the published page
 # rather than retyped here.
 table2 <- function(claim_id) {
@@ -113,7 +127,31 @@ entries <- tribble(
     "{table2('t2_naive_estimate')} for this estimate, which is {pts(naive$estimate)} ",
     "percentage points. The missing word is the one the rest of the paragraph uses, so ",
     "it is supplied rather than guessed at, and the figure itself is correct as published."),
-  ""
+  "",
+
+  4, "float", "remaster", "brief",
+  "Table 2's bounds interval drops a digit the rest of its column carries",
+  "published p. 3, Table 2",
+  str_glue("[[Table 2's bounds row, whose 95% confidence interval opens at ",
+           "{table2('t2_bounds_ci_lower')}]]"),
+  str_glue("[[{cell(archive_boot$conf_low)}, the same value at the three decimal places ",
+           "the rest of the column is given to]]"),
+  str_glue(
+    "Found while preparing the remastered edition. The value is not in dispute and no ",
+    "estimate moves: the limit is {cell(archive_boot$conf_low)}, and the five other ",
+    "limits in the same column are printed to three places ",
+    "({table2('t2_naive_ci_lower')}, {table2('t2_naive_ci_upper')}, ",
+    "{table2('t2_redefined_ci_lower')}, {table2('t2_redefined_ci_upper')} and ",
+    "{table2('t2_bounds_ci_upper')}). Line 187 of the deposited ",
+    "`aec_replication_JEPS.R` builds the cell as ",
+    "`paste0(\"[\", round(ci_lower, 3), \", \", round(ci_upper, 3), \"]\")`, and ",
+    "`round()` returns a numeric that `paste0` converts with `as.character`, which drops ",
+    "a trailing zero; the other limits keep their three places only because none of them ",
+    "ends in one. This is the one cell of Table 2 the maintained rewrite does not return: ",
+    "R 3.6.0 changed `sample()`, so it is reproduced under the archive's own resampling ",
+    "scheme and the sampler the 2018 run used, which is what ",
+    "`maintained/output/text_bootstrap_sampler.csv` records."),
+  "t2_bounds_ci_lower"
 ) |>
   mutate(across(c(title, published, corrected, note), as.character))
 
@@ -139,7 +177,7 @@ n_entries_word <- c("one", "two", "three", "four", "five", "six", "seven", "eigh
 bold <- function(x) str_replace_all(x, "\\[\\[(.*?)\\]\\]", "**\\1**")
 ```
 
-This note lists `r n_entries_word` corrections to "Avoiding Post-Treatment Bias in Audit Experiments," published in the *Journal of Experimental Political Science* 6(1), 1-4, doi [10.1017/XPS.2018.9](https://doi.org/10.1017/XPS.2018.9). All of them are in the reanalysis paragraph on page 3, and **none of them changes a conclusion of the paper.** Two are misstated numbers, in each case the correct value truncated rather than rounded at the last digit the sentence prints; the third is an estimate printed without its unit. Table 2, which carries the same reanalysis, is right in every cell it prints, and the argument the note makes about post-treatment conditioning is unaffected.
+This note lists `r n_entries_word` corrections to "Avoiding Post-Treatment Bias in Audit Experiments," published in the *Journal of Experimental Political Science* 6(1), 1-4, doi [10.1017/XPS.2018.9](https://doi.org/10.1017/XPS.2018.9). Three are in the reanalysis paragraph on page 3 and the fourth is in Table 2, and **none of them changes a conclusion of the paper.** Two are misstated numbers, in each case the correct value truncated rather than rounded at the last digit the sentence prints; the third is an estimate printed without its unit; the fourth is a table cell printed to one fewer decimal place than the column it sits in, with the value itself unchanged. Every estimate Table 2 reports is right, and the argument the note makes about post-treatment conditioning is unaffected.
 
 Every number in a corrected sentence below is computed from the deposited replication archive ([10.7910/DVN/6NVI9C](https://doi.org/10.7910/DVN/6NVI9C)) at the time this document is rendered, including the numbers that were not wrong. The code and output supporting each correction are at [github.com/active-maintenance-aec/coppock_2019b](https://github.com/active-maintenance-aec/coppock_2019b).
 

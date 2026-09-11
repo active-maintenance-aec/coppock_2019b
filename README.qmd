@@ -213,7 +213,7 @@ cis <- c(paste0("[", round(fit_1$ci_lower[2], 3), ", ", ...))
 
 # Errata
 
-The article needs `r n_errata_word` corrections, all of them in the reanalysis paragraph on page 3, and none of them changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
+The article needs `r n_errata_word` corrections, three of them in the reanalysis paragraph on page 3 and the fourth in Table 2, and none of them changes a conclusion. `errata.qmd` sets them out and renders to `coppock_2019b_errata.pdf` at the root of this repository, computing every corrected value from `maintained/output/` at the moment it is rendered, so the note cannot go stale in the way the sentences did.
 
 Two of them are the same defect. The article gives the Always-Responder estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the standard error on the redefined outcome as 1.7 points where the standard error is 1.756. In each case the published figure is the correct value truncated rather than rounded at the last digit it prints. Table 2 is right in every cell it prints, which is why the errata quotes its cells rather than reprinting it.
 

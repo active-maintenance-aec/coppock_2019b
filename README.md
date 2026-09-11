@@ -56,7 +56,7 @@ the extraction of every number the article prints,
 `extract_archive_values.R` runs the deposited script, and
 `build_ground_truth.R` assembles the comparison and gates it.
 `original/` is created by the download script and is deliberately absent
-from the repository. `errata.qmd` renders the three corrections the
+from the repository. `errata.qmd` renders the four corrections the
 article needs. This file is the reproducibility report, also available
 as a PDF in `report/`.
 
@@ -231,12 +231,12 @@ exactly what makes it worth recording.
 
 # Errata
 
-The article needs three corrections, all of them in the reanalysis
-paragraph on page 3, and none of them changes a conclusion. `errata.qmd`
-sets them out and renders to `coppock_2019b_errata.pdf` at the root of
-this repository, computing every corrected value from
-`maintained/output/` at the moment it is rendered, so the note cannot go
-stale in the way the sentences did.
+The article needs four corrections, three of them in the reanalysis
+paragraph on page 3 and the fourth in Table 2, and none of them changes
+a conclusion. `errata.qmd` sets them out and renders to
+`coppock_2019b_errata.pdf` at the root of this repository, computing
+every corrected value from `maintained/output/` at the moment it is
+rendered, so the note cannot go stale in the way the sentences did.
 
 Two of them are the same defect. The article gives the Always-Responder
 estimate as $-5.5$ points where its own Table 2 gives $-0.056$, and the
