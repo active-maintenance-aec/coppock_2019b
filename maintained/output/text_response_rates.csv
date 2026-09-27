@@ -1,4 +1,4 @@
 claim,value,n,std_error,conf_low,conf_high,p_value
 "Response rate, Putatively non-Latino White name",70.50720100187851,1597,NA,NA,NA,NA
 "Response rate, Putatively Latino name",64.83103879849811,1598,NA,NA,NA,NA
-"Difference in response rates, percentage points",-5.6761622033803585,3195,1.6524583518812253,-8.916149227055136,-2.4361751797055797,6.001537654997317e-4
+"Difference in response rates, percentage points",-5.676162203380398,3195,1.6524583518812415,-8.91614922705521,-2.4361751797055873,6.001537654997535e-4

@@ -590,11 +590,11 @@ are the first two errata.
 |:----------|:-----------------------|
 | R version | 4.6.0                  |
 | Platform  | aarch64-apple-darwin23 |
-| Date run  | 2026-09-11             |
+| Date run  | 2026-09-27             |
 
 | Package  | Version |
 |:---------|:--------|
-| estimatr | 2.0.0   |
+| estimatr | 2.0.1   |
 | rsample  | 1.3.2   |
 | dplyr    | 1.2.1   |
 | tidyr    | 1.3.2   |

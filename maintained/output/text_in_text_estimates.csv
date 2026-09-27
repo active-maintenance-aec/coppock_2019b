@@ -2,9 +2,9 @@ claim,value
 "Lower bound, percentage points",-65.78014184397179
 "Upper bound, percentage points",64.53900709219823
 Matched pairs in which both members responded,719
-"Always-Responder ATE, percentage points",-5.56328233657858
-"Always-Responder SE, percentage points",2.481904081345615
-"Redefined-outcome ATE, percentage points",-6.09994647348007
-"Redefined-outcome SE, percentage points",1.7562881328985671
-"Naive ATE, percentage points",-3.542386576581199
-"Naive SE, percentage points",2.040985560047589
+"Always-Responder ATE, percentage points",-5.563282336578564
+"Always-Responder SE, percentage points",2.481904081345604
+"Redefined-outcome ATE, percentage points",-6.099946473480119
+"Redefined-outcome SE, percentage points",1.7562881328985858
+"Naive ATE, percentage points",-3.542386576581144
+"Naive SE, percentage points",2.040985560047586

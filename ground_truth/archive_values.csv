@@ -1,16 +1,16 @@
 quantity,value
-naive estimate,-0.03542386576581199
-naive conf low,-0.07544890684318824
-naive conf high,0.0046011753115642595
-naive std error,0.020409855600475896
-redefined estimate,-0.0609994647348007
-redefined conf low,-0.09543513298596865
-redefined conf high,-0.02656379648363276
-redefined std error,0.01756288132898567
-always responder estimate,-0.0556328233657858
-always responder conf low,-0.10431828452566028
-always responder conf high,-0.006947362205911335
-always responder std error,0.024819040813456157
+naive estimate,-0.03542386576581144
+naive conf low,-0.07544890684318764
+naive conf high,0.004601175311564752
+naive std error,0.020409855600475868
+redefined estimate,-0.06099946473480119
+redefined conf low,-0.0954351329859695
+redefined conf high,-0.026563796483632877
+redefined std error,0.01756288132898586
+always responder estimate,-0.05563282336578564
+always responder conf low,-0.10431828452565989
+always responder conf high,-0.006947362205911398
+always responder std error,0.024819040813456043
 bounds low,-0.6578014184397178
 bounds high,0.6453900709219823
 bounds conf low,-0.7386384996582365
