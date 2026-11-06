@@ -38,6 +38,10 @@ naive <- estimator_row("Naive difference-in-means")
 # minus sign, so a corrected sentence reads like the published one.
 pts <- function(x) str_replace(sprintf("%.1f", 100 * x), "^-", "−")
 
+# The same figure as a plain number for corrected_values, with an ASCII minus a parser can
+# read in place of the article's minus sign.
+ascii_minus <- function(x) str_replace_all(x, "−", "-")
+
 # Fuller precision, for a reason line rather than a sentence.
 pts3 <- function(x) str_replace(sprintf("%.3f", 100 * x), "^-", "−")
 
@@ -85,8 +89,15 @@ table2 <- function(claim_id) {
 # of every note. It is empty where an entry has no ground-truth row, which is normal for a
 # bibliographic or structural entry. ground_truth/build_ground_truth.R refuses to build if
 # any id here is absent from the ground truth.
+#
+# corrected_values runs parallel to claim_ids, one value per id in the same order, carrying
+# the corrected quantity as a number rather than as a sentence. The sentence already holds
+# it, but only inside prose a reader has to parse. Each value comes from the same expression
+# that glues the sentence, so the two cannot be written apart, and the gate below re-checks
+# that each one is still inside the span it belongs to. An entry of a class that changes no
+# quantity carries NA, and so does a note-form entry, which corrects nothing.
 entries <- tribble(
-  ~entry, ~class, ~source, ~form, ~title, ~location, ~published, ~corrected, ~note, ~claim_ids,
+  ~entry, ~class, ~source, ~form, ~title, ~location, ~published, ~corrected, ~note, ~claim_ids, ~corrected_values,
 
   1, "quantity", "pipeline", "full",
   "The Always-Responder estimate disagrees with Table 2",
@@ -101,6 +112,7 @@ entries <- tribble(
     "The standard error is {pts3(always_responder$std_error)} points and is correct as ",
     "published."),
   "p3_ar_ate_points",
+  ascii_minus(str_glue("{pts(always_responder$estimate)}")),
 
   2, "quantity", "pipeline", "full",
   "The standard error on the redefined outcome",
@@ -115,6 +127,7 @@ entries <- tribble(
     "which the sentence truncates to a whole number in the same way; it is given here at ",
     "the decimal the corrected standard error is given to."),
   "p3_redefined_se_points",
+  str_glue("{pts(redefined$std_error)}"),
 
   3, "wording", "remaster", "brief",
   "The naive estimate is printed without its unit",
@@ -128,6 +141,7 @@ entries <- tribble(
     "percentage points. The missing word is the one the rest of the paragraph uses, so ",
     "it is supplied rather than guessed at, and the figure itself is correct as published."),
   "",
+  NA_character_,
 
   4, "float", "remaster", "brief",
   "Table 2's bounds interval drops a digit the rest of its column carries",
@@ -151,11 +165,55 @@ entries <- tribble(
     "R 3.6.0 changed `sample()`, so it is reproduced under the archive's own resampling ",
     "scheme and the sampler the 2018 run used, which is what ",
     "`maintained/output/text_bootstrap_sampler.csv` records."),
-  "t2_bounds_ci_lower"
+  "t2_bounds_ci_lower",
+  NA_character_
 ) |>
-  mutate(across(c(title, published, corrected, note), as.character))
+  mutate(across(c(title, published, corrected, note, claim_ids, corrected_values),
+                as.character))
 
 stopifnot(nrow(entries) == max(entries$entry), !anyDuplicated(entries$entry))
+
+# Gate: corrected_values agrees with the sentence it was glued into ----
+# The column and the sentence are written from one expression, so they begin in agreement
+# and this gate exists for the edit that separates them: a value moved from one marked span
+# to another, a span reworded to carry a second number, a claim id appended without its
+# value. Each value has to be inside the span it belongs to, matched by position where the
+# counts line up, and inside SOME span where an entry marks a label as well as a number and
+# its spans outnumber its values.
+marked_spans <- function(x) ascii_minus(str_match_all(x, "\\[\\[(.*?)\\]\\]")[[1]][, 2])
+
+quantified <- entries |>
+  filter(!is.na(corrected_values)) |>
+  mutate(ids = str_split(claim_ids, ";"), values = str_split(corrected_values, ";"),
+         spans = map(corrected, marked_spans))
+
+stopifnot(all(lengths(quantified$ids) == lengths(quantified$values)))
+
+value_placed <- pmap_lgl(quantified, function(...) {
+  e <- list(...)
+  if (length(e$values) == length(e$spans)) {
+    all(map2_lgl(e$values, e$spans, \(v, s) str_detect(s, fixed(v))))
+  } else {
+    all(map_lgl(e$values, \(v) any(map_lgl(e$spans, \(s) str_detect(s, fixed(v))))))
+  }
+})
+
+if (!all(value_placed)) {
+  print(quantified |> filter(!value_placed) |> select(entry, title, corrected_values, corrected))
+  stop("An entry's corrected_values are not in the spans of its corrected sentence.")
+}
+
+# An entry that changes a quantity has to say which one, and an entry that changes none may
+# not carry a value. The class is the declaration and this is where it binds. A note-form
+# entry corrects nothing, so it carries NA whatever its class. An empty claim_ids is stored
+# as "" and counts as missing here.
+has_ids <- !is.na(entries$claim_ids) & entries$claim_ids != ""
+needs_value <- entries$class == "quantity" & entries$form != "note" & has_ids
+stopifnot(
+  all(!is.na(entries$corrected_values[needs_value])),
+  all(is.na(entries$corrected_values[!needs_value])),
+  all(is.na(entries$corrected_values) | has_ids)
+)
 
 # Every id an entry claims to correct must be a real ground-truth claim. The build gate in
 # ground_truth/build_ground_truth.R checks the same property from the other side; checking it
