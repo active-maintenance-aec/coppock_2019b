@@ -78,8 +78,11 @@ table2 <- function(claim_id) {
 # [[...]] marks the span that changes. Each renderer supplies its own markup for it: bold
 # here. Nothing else in a field is markup, so the same string can be set by any of them.
 #
-# Numbering is the published note's and is APPEND-ONLY: entry 1 can already have been cited,
-# so a later finding is added at the end and never interleaved.
+# Numbering follows PROCEDURES.md Stage 4b: entries are ordered by severity block (quantity;
+# description, interpretation, definition; label, float, cross_reference; wording, spelling,
+# typography; bibliographic), discovery order inside a block, and a finding that lands in an
+# earlier block renumbers the entries after it. Renumbered 2026-11-07; the old-to-new map is
+# in that day's commit message.
 #
 # A published or corrected value that the pipeline computes stays computed: the field is
 # built with str_glue() so the number is produced when this document renders, not typed.
@@ -101,7 +104,7 @@ entries <- tribble(
 
   1, "quantity", "pipeline", "full",
   "The Always-Responder estimate disagrees with Table 2",
-  "published p. 3",
+  "p. 3",
   "Under the unverifiable assumption that both pair members would also have responded if the treatment assignment had been switched, I estimate the ATE among this subgroup to be [[−5.5]] points (SE = 2.5 points).",
   str_glue("Under the unverifiable assumption that both pair members would also have responded if the treatment assignment had been switched, I estimate the ATE among this subgroup to be [[{pts(always_responder$estimate)}]] points (SE = {pts(always_responder$std_error)} points)."),
   str_glue(
@@ -116,7 +119,7 @@ entries <- tribble(
 
   2, "quantity", "pipeline", "full",
   "The standard error on the redefined outcome",
-  "published p. 3",
+  "p. 3",
   "Finally, using the redefined outcome, I estimate the ATE to be a [[6]] point decrease in friendliness (SE = [[1.7]] points).",
   str_glue("Finally, using the redefined outcome, I estimate the ATE to be a [[{str_remove(pts(redefined$estimate), '−')}]] point decrease in friendliness (SE = [[{pts(redefined$std_error)}]] points)."),
   str_glue(
@@ -129,23 +132,9 @@ entries <- tribble(
   "p3_redefined_se_points",
   str_glue("{pts(redefined$std_error)}"),
 
-  3, "wording", "remaster", "brief",
-  "The naive estimate is printed without its unit",
-  "published p. 3",
-  "(−3.5 [[percentage]], SE = 2.0 points)",
-  str_glue("({pts(naive$estimate)} [[percentage points]], SE = {pts(naive$std_error)} points)"),
-  str_glue(
-    "Found while preparing the remastered edition. Every other quantity in the sentence ",
-    "and in the one before it is given in points, and Table 2 prints ",
-    "{table2('t2_naive_estimate')} for this estimate, which is {pts(naive$estimate)} ",
-    "percentage points. The missing word is the one the rest of the paragraph uses, so ",
-    "it is supplied rather than guessed at, and the figure itself is correct as published."),
-  "",
-  NA_character_,
-
-  4, "float", "remaster", "brief",
+  3, "float", "reading", "brief",
   "Table 2's bounds interval drops a digit the rest of its column carries",
-  "published p. 3, Table 2",
+  "p. 3, Table 2",
   str_glue("[[Table 2's bounds row, whose 95% confidence interval opens at ",
            "{table2('t2_bounds_ci_lower')}]]"),
   str_glue("[[{cell(archive_boot$conf_low)}, the same value at the three decimal places ",
@@ -166,6 +155,20 @@ entries <- tribble(
     "scheme and the sampler the 2018 run used, which is what ",
     "`maintained/output/text_bootstrap_sampler.csv` records."),
   "t2_bounds_ci_lower",
+  NA_character_,
+
+  4, "wording", "reading", "brief",
+  "The naive estimate is printed without its unit",
+  "p. 3",
+  "(−3.5 [[percentage]], SE = 2.0 points)",
+  str_glue("({pts(naive$estimate)} [[percentage points]], SE = {pts(naive$std_error)} points)"),
+  str_glue(
+    "Found while preparing the remastered edition. Every other quantity in the sentence ",
+    "and in the one before it is given in points, and Table 2 prints ",
+    "{table2('t2_naive_estimate')} for this estimate, which is {pts(naive$estimate)} ",
+    "percentage points. The missing word is the one the rest of the paragraph uses, so ",
+    "it is supplied rather than guessed at, and the figure itself is correct as published."),
+  "",
   NA_character_
 ) |>
   mutate(across(c(title, published, corrected, note, claim_ids, corrected_values),
@@ -254,5 +257,12 @@ walk(seq_len(nrow(entries)), function(i) {
 ```{r emit-spine}
 # The machine-readable spine, written wherever this document is rendered. Anything else that
 # carries these corrections reads it rather than keeping its own copy, so the two cannot drift.
+# The spine's vocabularies are closed (cleanup of 2026-11-07): a value outside them is a
+# typo, and the edition builders read these columns to shape every entry.
+stopifnot(
+  all(entries$class %in% c("quantity", "description", "interpretation", "definition", "label", "float", "cross_reference", "wording", "spelling", "typography", "bibliographic")),
+  all(entries$form %in% c("full", "brief", "note")),
+  all(entries$source %in% c("pipeline", "reading", "reference_audit", "publisher_record", "authors_archive", "proof"))
+)
 write_csv(entries, here("errata_entries.csv"))
 ```
