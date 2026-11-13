@@ -1,7 +1,7 @@
 # coppock_2019b/ground_truth/build_ground_truth.R
-# Output: ground_truth/coppock_2019b_ground_truth.csv
+# Output: ground_truth/coppock_2019b_ground_truth.csv, ground_truth/float_coverage.csv
 # Depends on: maintained/output/ (run run_all.R first), ground_truth/archive_values.csv,
-#   ground_truth/published_claims.csv
+#   ground_truth/published_claims.csv, errata_entries.csv
 # Description: Assemble the ground truth table and run the coverage gates over it.
 #
 #   Provenance, which is the whole point of generating this file rather than typing it:
@@ -225,7 +225,7 @@ gt <- tribble(
 claims <- read_csv(here::here("ground_truth", "published_claims.csv"),
                    col_types = cols(.default = col_character(),
                                     value_paper = col_character())) |>
-  mutate(needs_block = needs_block == "TRUE")
+  mutate(needs_block = needs_block == "TRUE", digits = as.integer(digits))
 
 stopifnot(!any(duplicated(claims$claim_id)), !any(is.na(claims$value_paper)))
 
@@ -246,12 +246,15 @@ agrees <- function(value, target_printed) {
   )
 }
 
+# The extraction's digits column states the same precision, and every comparison here
+# reads it off the string, so the two have to agree.
+stopifnot(identical(claims$digits, as.integer(printed_decimals(claims$value_paper))))
+
 gt <- gt |>
-  left_join(claims |> select(claim_id, location, claim, claim_type, value_paper),
+  left_join(claims |> select(claim_id, location, claim, claim_type, value_paper, digits),
             by = "claim_id") |>
   mutate(
     paper_id = "coppock_2019b",
-    table_figure = location,
     # A descriptive claim has no printed number to agree with, so its verdict is a third
     # state: match and match_rewrite stay NA and holds carries it.
     descriptive = claim_type == "descriptive",
@@ -262,7 +265,7 @@ gt <- gt |>
     notes = replace_na(notes, "")
   )
 
-stopifnot(!any(is.na(gt$claim)), !any(duplicated(gt$claim_id)))
+stopifnot(!any(is.na(gt$claim)), !any(is.na(gt$location)), !any(duplicated(gt$claim_id)))
 
 # A locus is required on every adverse verdict, and on no clean row ----
 # The gate reads all three verdicts. Stated on match_rewrite alone it could not see a
@@ -283,16 +286,37 @@ stopifnot(
 )
 
 # Float coverage, as a fraction rather than as an existence check ----
-# "At least one row" is not coverage of a float. Table 1 is a stipulated typology whose
-# other three strata no analysis identifies, so its covered fraction is low by design and
-# is stated rather than waved through.
+# "At least one row" is not coverage of a float. The article's two floats are both
+# tables and it has no figures. published_numbers counts the extraction's rows for each
+# table, which is every number printed on its face, Table 2's confidence level among
+# them. Table 1 is a stipulated typology whose other three strata no analysis
+# identifies, so its covered fraction is low by design and is stated rather than waved
+# through.
+float_notes <- c(
+  "Table 1" = "A stipulated typology of principal strata; only the Always-Responder row names units any analysis identifies, so the other six cells are verified nowhere.",
+  "Table 2" = "The two bootstrap interval endpoints on the bounds return only under the sampler R used before 3.6.0; see t2_bounds_ci_lower and t2_bounds_ci_upper."
+)
+
 float_coverage <- claims |>
   filter(str_starts(location, "Table")) |>
   mutate(float = str_extract(location, "^Table \\d+")) |>
-  summarize(published_cells = n(), covered_cells = sum(claim_id %in% gt$claim_id),
-            .by = float)
+  left_join(gt |> select(claim_id, match, match_rewrite), by = "claim_id") |>
+  summarize(
+    published_numbers = n(),
+    covered = sum(claim_id %in% gt$claim_id),
+    reproduced_by_rewrite = sum(match_rewrite == 1, na.rm = TRUE),
+    reproduced_by_archive = sum(match == 1, na.rm = TRUE),
+    .by = float
+  ) |>
+  mutate(plotted = NA_integer_, plotted_reproduced = NA_integer_,
+         note = unname(float_notes[float]))
 
-stopifnot(all(float_coverage$covered_cells >= 1))
+stopifnot(
+  identical(float_coverage$float, c("Table 1", "Table 2")),
+  all(float_coverage$covered >= 1)
+)
+
+write_csv(float_coverage, here::here("ground_truth", "float_coverage.csv"))
 
 # The second instrument ----
 # Read as a program, not as text: a block that errors at runtime, or that ends in a bare
@@ -332,9 +356,50 @@ cross_check <- printed |>
 if (any(!cross_check$agrees)) print(cross_check |> filter(!agrees), n = Inf, width = 200)
 stopifnot(length(setdiff(declared, cross_check$claim_id)) == 0, all(cross_check$agrees))
 
+# Disposition: what became of each defect ----
+# corrected_here is computed from the errata spine and never typed. Every other judgment
+# is one the report or the errata already make, keyed by claim_id; a defect nobody has
+# judged stays NA.
+errata_ids <- read_csv(here::here("errata_entries.csv"),
+                       col_types = cols(.default = col_character()))$claim_ids |>
+  str_split(";") |>
+  unlist() |>
+  str_trim() |>
+  discard(\(x) is.na(x) | x == "")
+
+disposition_judgments <- tribble(
+  ~claim_id, ~judgment, ~judgment_reason,
+  "t2_bounds_ci_upper", "documented_only",
+  "The published endpoint is right: the deposit's seed returns it under the pre-3.6 sampler. The report documents the sampler change and the rewrite keeps the current sampler, so the article needs no erratum."
+)
+
 gt <- gt |>
-  select(paper_id, claim_id, table_figure, claim, value_script, value_paper, match,
-         value_rewrite, match_rewrite, holds, defect_locus, notes)
+  left_join(disposition_judgments, by = "claim_id") |>
+  mutate(
+    disposition = case_when(
+      is.na(defect_locus) ~ NA_character_,
+      claim_id %in% errata_ids ~ "corrected_here",
+      .default = judgment
+    ),
+    disposition_reason = if_else(!is.na(disposition) & disposition != "corrected_here",
+                                 judgment_reason, NA_character_)
+  )
+
+stopifnot(all(is.na(gt$judgment[is.na(gt$defect_locus) | gt$claim_id %in% errata_ids])))
+
+undisposed <- gt |> filter(defect_locus == "paper_internal", is.na(disposition))
+if (nrow(undisposed) > 0) {
+  print(undisposed |> select(claim_id, location, claim))
+  stop(str_glue("{nrow(undisposed)} paper_internal rows carry no disposition."))
+}
+print(gt |> filter(!is.na(defect_locus)) |> count(defect_locus, disposition))
+
+# The ground truth, in the canonical column order ----
+gt <- gt |>
+  mutate(across(c(match, match_rewrite, holds), as.logical)) |>
+  select(paper_id, claim_id, location, claim_type, claim, value_paper, digits,
+         value_script, match, value_rewrite, match_rewrite, holds, defect_locus,
+         disposition, disposition_reason, notes)
 
 write_csv(gt, here::here("ground_truth", "coppock_2019b_ground_truth.csv"))
 
@@ -362,8 +427,8 @@ if (file.exists(errata_spine)) {
   stopifnot(length(dangling) == 0)
 }
 
-print(gt |> select(claim_id, table_figure, value_script, value_paper, match,
-                   value_rewrite, match_rewrite, holds, defect_locus),
+print(gt |> select(claim_id, location, value_script, value_paper, match,
+                   value_rewrite, match_rewrite, holds, defect_locus, disposition),
       n = nrow(gt), width = 200)
 print(float_coverage)
 print(tibble(
@@ -373,9 +438,9 @@ print(tibble(
                "extraction rows", "extraction rows needing a block",
                "claims printed by in_text_claims.R",
                "claims compared across the two instruments"),
-  value = c(nrow(gt), sum(!is.na(gt$match)), sum(gt$match == 1, na.rm = TRUE),
-            sum(!is.na(gt$match_rewrite)), sum(gt$match_rewrite == 1, na.rm = TRUE),
-            sum(gt$match_rewrite == 0, na.rm = TRUE),
-            sum(!is.na(gt$holds)), sum(gt$holds == 1, na.rm = TRUE),
+  value = c(nrow(gt), sum(!is.na(gt$match)), sum(gt$match, na.rm = TRUE),
+            sum(!is.na(gt$match_rewrite)), sum(gt$match_rewrite, na.rm = TRUE),
+            sum(!gt$match_rewrite, na.rm = TRUE),
+            sum(!is.na(gt$holds)), sum(gt$holds, na.rm = TRUE),
             nrow(claims), length(declared), nrow(printed), nrow(cross_check))
 ))

@@ -47,10 +47,17 @@ gt <- read_csv(here::here("ground_truth", "coppock_2019b_ground_truth.csv"),
                col_types = cols(.default = col_double(),
                                 paper_id = col_character(),
                                 claim_id = col_character(),
-                                table_figure = col_character(),
+                                location = col_character(),
+                                claim_type = col_character(),
                                 claim = col_character(),
                                 value_paper = col_character(),
+                                digits = col_integer(),
+                                match = col_logical(),
+                                match_rewrite = col_logical(),
+                                holds = col_logical(),
                                 defect_locus = col_character(),
+                                disposition = col_character(),
+                                disposition_reason = col_character(),
                                 notes = col_character()))
 
 claims <- read_csv(here::here("ground_truth", "published_claims.csv"),
@@ -80,7 +87,7 @@ This repository holds the actively maintained replication code for Coppock (2019
 
 **The data are not redistributed here.** The deposit is 1.3 MB across four files and lives at Harvard Dataverse, which is the only copy this repository points at. `download_original.R` fetches it and verifies every file; `original_manifest.csv` pins the file identifiers, sizes and checksums, so the exact bytes this code was written against are recorded in version control even though the bytes themselves are not.
 
-**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it: `published_claims.csv` is the extraction of every number the article prints, `extract_archive_values.R` runs the deposited script, and `build_ground_truth.R` assembles the comparison and gates it. `original/` is created by the download script and is deliberately absent from the repository. `errata.qmd` renders the `r n_errata_word` corrections the article needs. This file is the reproducibility report, also available as a PDF in `report/`.
+**Repository layout.** `maintained/` is the maintained rewrite: one script per published table or set of in-text quantities, writing to `output/`, which is committed so a reader can compare a fresh run against it without downloading anything. `ground_truth/` ties every published number to the code that produces it: `published_claims.csv` is the extraction of every number the article prints, `run_archive.R` runs the deposited script exactly as shipped and records in `archive_run_status.csv` where it stops, `extract_archive_values.R` runs it again with its defects repaired, and `build_ground_truth.R` assembles the comparison, writes `float_coverage.csv`, and gates both. `original/` is created by the download script and is deliberately absent from the repository. `errata.qmd` renders the `r n_errata_word` corrections the article needs. This file is the reproducibility report, also available as a PDF in `report/`.
 
 **License.** CC0 1.0 Universal, matching the terms of the deposit this repository maintains. See `LICENSE`.
 
@@ -108,11 +115,8 @@ n_environment <- sum(gt$defect_locus == "environment", na.rm = TRUE)
 n_paper_internal <- sum(gt$defect_locus == "paper_internal", na.rm = TRUE)
 n_needs_block <- sum(claims$needs_block)
 
-float_coverage <- claims |>
-  filter(str_starts(location, "Table")) |>
-  mutate(float = str_extract(location, "^Table \\d+")) |>
-  summarize(published_cells = n(), covered_cells = sum(claim_id %in% gt$claim_id),
-            .by = float)
+float_coverage <- read_csv(here::here("ground_truth", "float_coverage.csv"),
+                           show_col_types = FALSE)
 
 covered <- function(float_name, column) {
   float_coverage[[column]][float_coverage$float == float_name]
@@ -232,8 +236,9 @@ That is a separate matter from the repairs described above, which are to the dep
 readable <- function(x) replace_na(format(signif(x, 6), trim = TRUE), "")
 
 gt |>
-  mutate(value_script = readable(value_script), match = replace_na(as.character(match), "")) |>
-  select(table_figure, claim, value_paper, value_script, match) |>
+  mutate(value_script = readable(value_script),
+         match = replace_na(as.character(as.integer(match)), "")) |>
+  select(location, claim, value_paper, value_script, match) |>
   kable(
     booktabs = TRUE,
     col.names = c("Location", "Claim", "Paper", "Archive", "Match"),
@@ -268,7 +273,7 @@ claims |>
     column_spec(1, width = "5cm"))
 ```
 
-Coverage of the two published tables is stated as a fraction rather than as an existence check, because one row is not coverage of a float. All `r covered("Table 2", "published_cells")` of Table 2's published numbers are covered, counting its confidence level. `r covered("Table 1", "covered_cells")` of Table 1's `r covered("Table 1", "published_cells")` are: Table 1 is a stipulated typology of principal strata, and only the Always-Responder row names units any analysis identifies. The other three strata are verified nowhere, which is a property of the paper rather than a gap in this repository.
+Coverage of the two published tables is stated as a fraction rather than as an existence check, because one row is not coverage of a float. All `r covered("Table 2", "published_numbers")` of Table 2's published numbers are covered, counting its confidence level. `r covered("Table 1", "covered")` of Table 1's `r covered("Table 1", "published_numbers")` are: Table 1 is a stipulated typology of principal strata, and only the Always-Responder row names units any analysis identifies. The other three strata are verified nowhere, which is a property of the paper rather than a gap in this repository.
 
 `maintained/in_text_claims.R` is the second instrument. It carries one block per claim, each with the article's own sentence quoted verbatim above code that recomputes the number from `maintained/output/` and prints it at the precision the article prints. It never reads the ground truth, never refits a model, and where `build_ground_truth.R` reaches a quantity through one output file it reaches the same quantity through another: the percentage-point figures come from the Table 2 estimates rather than from `text_in_text_estimates.csv`, the pair count and the response rates from the analysis frames, and the two significance claims from the confidence intervals where the ground truth uses the p-values. Agreement between two derivations is evidence the arithmetic is right; it is not evidence that the quantity is the one the sentence names, which is what writing the block out of the sentence is for.
 
@@ -277,7 +282,7 @@ Coverage of the two published tables is stated as a fraction rather than as an e
 ```{r locus_table}
 gt |>
   filter(!is.na(defect_locus)) |>
-  select(table_figure, claim, value_paper, value_rewrite, defect_locus) |>
+  select(location, claim, value_paper, value_rewrite, defect_locus) |>
   mutate(value_rewrite = sprintf("%.3f", value_rewrite)) |>
   kable(
     booktabs = TRUE,
@@ -469,10 +474,10 @@ in_text |>
 gt |>
   mutate(
     value_rewrite = readable(value_rewrite),
-    verdict = replace_na(as.character(coalesce(match_rewrite, holds)), ""),
+    verdict = replace_na(as.character(as.integer(coalesce(match_rewrite, holds))), ""),
     notes = replace_na(notes, "")
   ) |>
-  select(table_figure, claim, value_paper, value_rewrite, verdict, notes) |>
+  select(location, claim, value_paper, value_rewrite, verdict, notes) |>
   kable(
     booktabs = TRUE,
     col.names = c("Location", "Claim", "Paper", "Rewrite", "Verdict", "Note"),

@@ -1,0 +1,3 @@
+float,published_numbers,covered,reproduced_by_rewrite,reproduced_by_archive,plotted,plotted_reproduced,note
+Table 1,8,2,2,2,NA,NA,"A stipulated typology of principal strata; only the Always-Responder row names units any analysis identifies, so the other six cells are verified nowhere."
+Table 2,14,14,12,12,NA,NA,The two bootstrap interval endpoints on the bounds return only under the sampler R used before 3.6.0; see t2_bounds_ci_lower and t2_bounds_ci_upper.

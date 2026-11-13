@@ -24,7 +24,10 @@
 - [Maintained rewrite verification](#maintained-rewrite-verification)
 - [R environment](#r-environment)
 
-**Archived at Zenodo:** [doi:10.5281/zenodo.24168312](https://doi.org/10.5281/zenodo.24168312). This DOI always resolves to the latest release of the maintained version.
+**Archived at Zenodo:**
+[doi:10.5281/zenodo.24168312](https://doi.org/10.5281/zenodo.24168312).
+This DOI always resolves to the latest release of the maintained
+version.
 
 *Drafted by Claude Opus 5 under the supervision of Alex Coppock.*
 
@@ -54,13 +57,15 @@ script per published table or set of in-text quantities, writing to
 `output/`, which is committed so a reader can compare a fresh run
 against it without downloading anything. `ground_truth/` ties every
 published number to the code that produces it: `published_claims.csv` is
-the extraction of every number the article prints,
-`extract_archive_values.R` runs the deposited script, and
-`build_ground_truth.R` assembles the comparison and gates it.
-`original/` is created by the download script and is deliberately absent
-from the repository. `errata.qmd` renders the four corrections the
-article needs. This file is the reproducibility report, also available
-as a PDF in `report/`.
+the extraction of every number the article prints, `run_archive.R` runs
+the deposited script exactly as shipped and records in
+`archive_run_status.csv` where it stops, `extract_archive_values.R` runs
+it again with its defects repaired, and `build_ground_truth.R` assembles
+the comparison, writes `float_coverage.csv`, and gates both. `original/`
+is created by the download script and is deliberately absent from the
+repository. `errata.qmd` renders the four corrections the article needs.
+This file is the reproducibility report, also available as a PDF in
+`report/`.
 
 **License.** CC0 1.0 Universal, matching the terms of the deposit this
 repository maintains. See `LICENSE`.
@@ -590,9 +595,9 @@ are the first two errata.
 
 | Item      | Value                  |
 |:----------|:-----------------------|
-| R version | 4.6.0                  |
+| R version | 4.6.2                  |
 | Platform  | aarch64-apple-darwin23 |
-| Date run  | 2026-09-27             |
+| Date run  | 2026-11-12             |
 
 | Package  | Version |
 |:---------|:--------|

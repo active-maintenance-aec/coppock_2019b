@@ -1,0 +1,3 @@
+pass,script,role,exit_status,outcome,stopped_at
+as_shipped,aec_replication_JEPS.R,analysis,1,error,Error in `group_data()`: ! `.data` must be a valid <grouped_df> object. Caused by error in `validate_grouped_df()`: ! Corrupt `grouped_df` using old (< 0.8.0) format. ℹ Strip off old grouping with `ungroup()`.
+stripped,aec_replication_JEPS.R,analysis,1,error,Error in `group_data()`: ! `.data` must be a valid <grouped_df> object. Caused by error in `validate_grouped_df()`: ! Corrupt `grouped_df` using old (< 0.8.0) format. ℹ Strip off old grouping with `ungroup()`.

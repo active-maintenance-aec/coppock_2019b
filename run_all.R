@@ -29,7 +29,9 @@ source(here::here("maintained", "text_bootstrap_sampler.R"))
 # The deposited script, run on current R ----
 # Repairs the deposit's four defects in a scratch copy and runs it there, so that the
 # ground truth's value_script column is generated rather than transcribed. original/ is
-# never written to and never run in.
+# never written to and never run in. ground_truth/run_archive.R, which runs the deposit
+# with no repair and writes archive_run_status.csv, is run on its own: its record
+# depends on whether the filesystem is case-sensitive, so it is kept out of this file.
 source(here::here("ground_truth", "extract_archive_values.R"))
 
 # Ground truth ----
